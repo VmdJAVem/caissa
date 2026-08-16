@@ -1,0 +1,4 @@
+#+TITLE: Caissa, a c++ chess engine
+
+This is a re-write of my c project [[https://github.com/VmdJAVem/supplyCat][supplyCat]] made with the intention of
+learning c++.
