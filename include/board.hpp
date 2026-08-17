@@ -52,11 +52,16 @@ public:
 	std::string toString() const;
 	Bitboard getPieces(Color c, Piece p) const;
 	void setPieces(Color c, Piece p, Bitboard value);
+	Color sideToMove() const;
 	std::optional<PieceOnSquare> pieceAt(Square sq) const;
 private:
 	std::array<std::array<Bitboard, 6>, 2> m_bitboards;
+	Color m_sideToMove = Color::White;
 };
 
 constexpr Bitboard squareToBitboard(Square sq) {
 	return 1ULL << static_cast<int>(sq);
+}
+constexpr Square bitboardToSquare(Bitboard bb) {
+	return static_cast<Square>(std::countr_zero(bb));
 }

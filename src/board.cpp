@@ -8,7 +8,9 @@ void Board::setPieces(Color c, Piece p, Bitboard value) {
 Bitboard Board::getPieces(Color c, Piece p) const {
         return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)];
 }
-
+Color Board::sideToMove() const {
+	return m_sideToMove;
+}
 Board::Board() {
 	for (int i = static_cast<int>(Square::A2); i <= static_cast<int>(Square::H2); ++i) {
 		Square sq = static_cast<Square>(i);
@@ -36,16 +38,17 @@ Board::Board() {
 }
 
 std::optional<PieceOnSquare> Board::pieceAt(Square sq) const {
-    Bitboard mask = squareToBitboard(sq);
+	if (sq == Square::None) return std::nullopt;
+	Bitboard mask = squareToBitboard(sq);
 
-    for (Color c : allColors) {
-        for (Piece p : allPieces) {
-            if (getPieces(c, p) & mask) {
-                return PieceOnSquare{c, p};
-            }
-        }
-    }
-    return std::nullopt;  // empty square
+	for (Color c : allColors) {
+		for (Piece p : allPieces) {
+			if (getPieces(c, p) & mask) {
+				return PieceOnSquare{c, p};
+			}
+		}
+	}
+	return std::nullopt;  // empty square	
 }
 
 std::string Board::toString() const {
