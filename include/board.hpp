@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <optional>
+#include <expected>
 
 using Bitboard = std::uint64_t;
 
@@ -21,7 +22,9 @@ enum class Piece {
 	Bishop,
 	Rook,
 	Queen,
-	King
+	King,
+
+	None
 };
 constexpr std::array<Piece, 6> allPieces = {
 	Piece::Pawn, Piece::Knight, Piece::Bishop,
@@ -46,6 +49,33 @@ struct PieceOnSquare {
 	Piece piece;
 };
 
+enum class CastlingRights : std::uint8_t {
+	None         = 0,
+	WhiteKingside  = 1 << 0,  // 0b0001
+	WhiteQueenside = 1 << 1,  // 0b0010
+	BlackKingside  = 1 << 2,  // 0b0100n
+	BlackQueenside = 1 << 3,  // 0b1000
+	All = WhiteKingside | WhiteQueenside | BlackKingside | BlackQueenside
+};
+
+constexpr CastlingRights operator|(CastlingRights a, CastlingRights b) {
+	return static_cast<CastlingRights>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+constexpr CastlingRights operator|=(CastlingRights& a, CastlingRights b) {
+	a = a | b;
+	return a;
+}
+constexpr CastlingRights operator&(CastlingRights a, CastlingRights b) {
+	return static_cast<CastlingRights>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+}
+constexpr CastlingRights operator~(CastlingRights a) {
+	return static_cast<CastlingRights>(~static_cast<uint8_t>(a) & static_cast<uint8_t>(CastlingRights::All));
+}
+constexpr CastlingRights& operator&=(CastlingRights& a, CastlingRights b) {
+	a = a & b;
+	return a;
+}
+
 class Board {
 public:
 	Board();
@@ -53,10 +83,19 @@ public:
 	Bitboard getPieces(Color c, Piece p) const;
 	void setPieces(Color c, Piece p, Bitboard value);
 	Color sideToMove() const;
+	void placePiece(Color c, Piece p, Square sq);
 	std::optional<PieceOnSquare> pieceAt(Square sq) const;
+	static Board empty();
+	static std::expected<Board,std::string> fromFen(const std::string& fen);
+	std::string toFen() const;
+	Square getEnPassantTarget() const;
 private:
 	std::array<std::array<Bitboard, 6>, 2> m_bitboards;
 	Color m_sideToMove = Color::White;
+	CastlingRights m_castlingRights = CastlingRights::All;
+	Square m_enPassantTarget = Square::None;
+	int m_halfMoveClock = 0;
+	int m_fullMoveNumber = 1;
 };
 
 constexpr Bitboard squareToBitboard(Square sq) {
@@ -64,4 +103,17 @@ constexpr Bitboard squareToBitboard(Square sq) {
 }
 constexpr Square bitboardToSquare(Bitboard bb) {
 	return static_cast<Square>(std::countr_zero(bb));
+}
+constexpr std::string squareName(Square sq) {
+	if (sq == Square::None) {
+		return "none";
+	}
+	auto index = static_cast<int>(sq);
+	int file = index % 8;
+	int rank = index / 8;
+
+	char fileChar = static_cast<char>('a' + file);
+	char rankChar = static_cast<char>('0' + rank + 1);
+
+	return std::string(1, fileChar) + std::string(1, rankChar);
 }

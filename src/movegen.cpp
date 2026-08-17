@@ -1,90 +1,99 @@
-#include <vector>
 #include "movegen.hpp"
 #include "board.hpp"
+#include <vector>
 
-// TODO: En passant
-std::vector<Move> generatePawnMoves(const Board& board, Color color) {
+std::vector<Move> generatePawnMoves(const Board &board, Color color) {
 	std::vector<Move> moves;
 	Bitboard pawns = board.getPieces(color, Piece::Pawn);
 
 	while (pawns) {
 		int index = std::countr_zero(pawns);
 		Square sq = static_cast<Square>(index);
-		Bitboard targetBB = pawnPushTable[static_cast<int>(color)][index];
+		Bitboard targetBitboard = pawnPushTable[static_cast<int>(color)][index];
 
-		if (targetBB != 0) {
-			Square target = bitboardToSquare(targetBB);
-			
-			if (!board.pieceAt(target)) {   // only push if target is empty
+		if (targetBitboard != 0) {
+			Square target = bitboardToSquare(targetBitboard);
+			if (!board.pieceAt(target)) {
 				auto targetIndex = static_cast<int>(target);
 				if ((color == Color::White)
-				    ? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
-				    : (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
-					for (auto& p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
+					? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
+					: (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
+					for (auto &p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
 						moves.push_back(Move{
-							.from = sq,
-							.to = target,
-							.piece = Piece::Pawn,
-							.capturedPiece = std::nullopt,
-							.promotionPiece = p
-						});
+						    .from = sq,
+						    .to = target,
+						    .piece = Piece::Pawn,
+						    .capturedPiece = Piece::None,
+						    .promotionPiece = p,
+						    .isEnPassant = false});
 					}
 				} else {
 					moves.push_back(Move{
-						.from = sq,
-						.to = target,
-						.piece = Piece::Pawn,
-						.capturedPiece = std::nullopt,
-						.promotionPiece = std::nullopt});
+					    .from = sq,
+					    .to = target,
+					    .piece = Piece::Pawn,
+					    .capturedPiece = Piece::None,
+					    .promotionPiece = Piece::None,
+					    .isEnPassant = false});
 					bool onStartRank = (color == Color::White)
-							   ? (index >= static_cast<int>(Square::A2) && index <= static_cast<int>(Square::H2))
-							   : (index >= static_cast<int>(Square::A7) && index <= static_cast<int>(Square::H7));
+							       ? (index >= static_cast<int>(Square::A2) && index <= static_cast<int>(Square::H2))
+							       : (index >= static_cast<int>(Square::A7) && index <= static_cast<int>(Square::H7));
 
 					if (onStartRank) {
 						int doubleTargetIndex = (color == Color::White) ? index + 16 : index - 16;
 						auto doubleTarget = static_cast<Square>(doubleTargetIndex);
 						if (!board.pieceAt(doubleTarget)) {
 							moves.push_back(Move{
-								.from = sq,
-								.to = doubleTarget,
-								.piece = Piece::Pawn,
-								.capturedPiece = std::nullopt,
-								.promotionPiece = std::nullopt
-							});
+							    .from = sq,
+							    .to = doubleTarget,
+							    .piece = Piece::Pawn,
+							    .capturedPiece = Piece::None,
+							    .promotionPiece = Piece::None,
+							    .isEnPassant = false});
 						}
 					}
 				}
-			}		
+			}
 		}
 		Bitboard possibleCaptures = pawnCaptureTable[static_cast<int>(color)][index];
+		Square enPassantTarget = board.getEnPassantTarget();
 		while (possibleCaptures) {
 			int targetIndex = std::countr_zero(possibleCaptures);
 			Square targetSquare = static_cast<Square>(targetIndex);
 
 			auto targetPiece = board.pieceAt(targetSquare);
-
-			if (targetPiece) {
+			if (targetSquare == enPassantTarget) {
+				moves.push_back(Move{
+				    .from = sq,
+				    .to = targetSquare,
+				    .piece = Piece::Pawn,
+				    .capturedPiece = Piece::Pawn,
+				    .promotionPiece = Piece::None,
+				    .isEnPassant = true});
+			}
+			else if (targetPiece) {
 				if (targetPiece->color != color) {
 					if ((color == Color::White)
-					    ? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
-					    : (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
-						for (auto& p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
+						? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
+						: (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
+						for (auto &p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
 							moves.push_back(Move{
-								.from = sq,
-								.to = targetSquare,
-								.piece = Piece::Pawn,
-								.capturedPiece = targetPiece->piece,
-								.promotionPiece = p
+							    .from = sq,
+							    .to = targetSquare,
+							    .piece = Piece::Pawn,
+							    .capturedPiece = targetPiece->piece,
+							    .promotionPiece = p,
+							    .isEnPassant = false,
 							});
 						}
 					} else {
 						moves.push_back(Move{
-							.from = sq,
-							.to = targetSquare,
-							.piece = Piece::Pawn,
-							.capturedPiece = targetPiece->piece,
-							.promotionPiece = std::nullopt
-						});
+						    .from = sq,
+						    .to = targetSquare,
+						    .piece = Piece::Pawn,
+						    .capturedPiece = targetPiece->piece,
+						    .promotionPiece = Piece::None,
+						    .isEnPassant = false});
 					}
 				}
 			}
@@ -94,4 +103,3 @@ std::vector<Move> generatePawnMoves(const Board& board, Color color) {
 	}
 	return moves;
 }
-
