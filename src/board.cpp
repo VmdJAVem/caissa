@@ -16,15 +16,13 @@ Square Board::getEnPassantTarget () const {
 	return m_enPassantTarget;
 }
 Board::Board() {
-	for (int i = static_cast<int>(Square::A2);
-	     i <= static_cast<int>(Square::H2); ++i) {
+	for (int i = static_cast<int>(Square::A2); i <= static_cast<int>(Square::H2); ++i) {
 		Square sq = static_cast<Square>(i);
 		setPieces(Color::White, Piece::Pawn,
 			  getPieces(Color::White, Piece::Pawn) |
 			      squareToBitboard(sq));
 	}
-	for (int i = static_cast<int>(Square::A7);
-	     i <= static_cast<int>(Square::H7); ++i) {
+	for (int i = static_cast<int>(Square::A7); i <= static_cast<int>(Square::H7); ++i) {
 		Square sq = static_cast<Square>(i);
 		setPieces(Color::Black, Piece::Pawn,
 			  getPieces(Color::Black, Piece::Pawn) |

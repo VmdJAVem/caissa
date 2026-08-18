@@ -20,21 +20,27 @@ int main(void) {
 	}
 
 	std::cout << b.toString();
-
-	auto moves = generatePawnMoves(b, Color::White);
-	std::cout << "White:\n";
-	for (auto& m : moves) {
-		std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
-		if (m.capturedPiece != Piece::None) std::cout << " (capture)";
-		if (m.promotionPiece != Piece::None) std::cout << " (promotes)";
-		std::cout << "\n";
-	}
-	auto blackMoves = generatePawnMoves(b, Color::Black);
-	std::cout << "Black:\n";
-	for (auto& m : blackMoves) {
-		std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
-		if (m.capturedPiece != Piece::None) std::cout << " (capture)";
-		if (m.promotionPiece != Piece::None) std::cout << " (promotes)";
-		std::cout << "\n";
-	}
+	// auto moves = generatePawnMoves(b, Color::White);
+	// std::cout << "White:\n";
+	// for (auto& m : moves) {
+	// 	std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
+	// 	if (m.capturedPiece != Piece::None) std::cout << " (capture)";
+	// 	if (m.promotionPiece != Piece::None) std::cout << " (promotes)";
+	// 	std::cout << "\n";
+	// }
+	// auto blackMoves = generatePawnMoves(b, Color::Black);
+	// std::cout << "Black:\n";
+	// for (auto& m : blackMoves) {
+	// 	std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
+	// 	if (m.capturedPiece != Piece::None) std::cout << " (capture)";
+	// 	if (m.promotionPiece != Piece::None) std::cout << " (promotes)";
+	// 	std::cout << "\n";
+	// }
+	auto moves = generateKnightMoves(b, Color::White);
+	std::cout << "Knights:\n";
+	 for (auto& m : moves) {
+	 	std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
+	 	if (m.capturedPiece != Piece::None) std::cout << " (capture)";
+	 	std::cout << "\n";
+	 }
 }

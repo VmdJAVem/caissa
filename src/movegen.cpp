@@ -16,40 +16,40 @@ std::vector<Move> generatePawnMoves(const Board &board, Color color) {
 			if (!board.pieceAt(target)) {
 				auto targetIndex = static_cast<int>(target);
 				if ((color == Color::White)
-					? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
-					: (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
+				    ? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
+				    : (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
 					for (auto &p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
 						moves.push_back(Move{
-						    .from = sq,
-						    .to = target,
-						    .piece = Piece::Pawn,
-						    .capturedPiece = Piece::None,
-						    .promotionPiece = p,
-						    .isEnPassant = false});
+							.from = sq,
+							.to = target,
+							.piece = Piece::Pawn,
+							.capturedPiece = Piece::None,
+							.promotionPiece = p,
+							.isEnPassant = false});
 					}
 				} else {
 					moves.push_back(Move{
-					    .from = sq,
-					    .to = target,
-					    .piece = Piece::Pawn,
-					    .capturedPiece = Piece::None,
-					    .promotionPiece = Piece::None,
-					    .isEnPassant = false});
+						.from = sq,
+						.to = target,
+						.piece = Piece::Pawn,
+						.capturedPiece = Piece::None,
+						.promotionPiece = Piece::None,
+						.isEnPassant = false});
 					bool onStartRank = (color == Color::White)
-							       ? (index >= static_cast<int>(Square::A2) && index <= static_cast<int>(Square::H2))
-							       : (index >= static_cast<int>(Square::A7) && index <= static_cast<int>(Square::H7));
+							   ? (index >= static_cast<int>(Square::A2) && index <= static_cast<int>(Square::H2))
+							   : (index >= static_cast<int>(Square::A7) && index <= static_cast<int>(Square::H7));
 
 					if (onStartRank) {
 						int doubleTargetIndex = (color == Color::White) ? index + 16 : index - 16;
 						auto doubleTarget = static_cast<Square>(doubleTargetIndex);
 						if (!board.pieceAt(doubleTarget)) {
 							moves.push_back(Move{
-							    .from = sq,
-							    .to = doubleTarget,
-							    .piece = Piece::Pawn,
-							    .capturedPiece = Piece::None,
-							    .promotionPiece = Piece::None,
-							    .isEnPassant = false});
+								.from = sq,
+								.to = doubleTarget,
+								.piece = Piece::Pawn,
+								.capturedPiece = Piece::None,
+								.promotionPiece = Piece::None,
+								.isEnPassant = false});
 						}
 					}
 				}
@@ -64,42 +64,82 @@ std::vector<Move> generatePawnMoves(const Board &board, Color color) {
 			auto targetPiece = board.pieceAt(targetSquare);
 			if (targetSquare == enPassantTarget) {
 				moves.push_back(Move{
-				    .from = sq,
-				    .to = targetSquare,
-				    .piece = Piece::Pawn,
-				    .capturedPiece = Piece::Pawn,
-				    .promotionPiece = Piece::None,
-				    .isEnPassant = true});
+					.from = sq,
+					.to = targetSquare,
+					.piece = Piece::Pawn,
+					.capturedPiece = Piece::Pawn,
+					.promotionPiece = Piece::None,
+					.isEnPassant = true});
 			}
 			else if (targetPiece) {
 				if (targetPiece->color != color) {
 					if ((color == Color::White)
-						? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
-						: (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
+					    ? (targetIndex >= static_cast<int>(Square::A8) && targetIndex <= static_cast<int>(Square::H8))
+					    : (targetIndex >= static_cast<int>(Square::A1) && targetIndex <= static_cast<int>(Square::H1))) {
 						for (auto &p : {Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen}) {
 							moves.push_back(Move{
-							    .from = sq,
-							    .to = targetSquare,
-							    .piece = Piece::Pawn,
-							    .capturedPiece = targetPiece->piece,
-							    .promotionPiece = p,
-							    .isEnPassant = false,
+								.from = sq,
+								.to = targetSquare,
+								.piece = Piece::Pawn,
+								.capturedPiece = targetPiece->piece,
+								.promotionPiece = p,
+								.isEnPassant = false,
 							});
 						}
 					} else {
 						moves.push_back(Move{
-						    .from = sq,
-						    .to = targetSquare,
-						    .piece = Piece::Pawn,
-						    .capturedPiece = targetPiece->piece,
-						    .promotionPiece = Piece::None,
-						    .isEnPassant = false});
+							.from = sq,
+							.to = targetSquare,
+							.piece = Piece::Pawn,
+							.capturedPiece = targetPiece->piece,
+							.promotionPiece = Piece::None,
+							.isEnPassant = false});
 					}
 				}
 			}
 			possibleCaptures &= possibleCaptures - 1;
 		}
 		pawns &= pawns - 1;
+	}
+	return moves;
+}
+std::vector<Move> generateKnightMoves(const Board &board, Color color) {
+	std::vector<Move> moves{};
+	Bitboard knights = board.getPieces(color, Piece::Knight);
+	while (knights) {
+		int index = std::countr_zero(knights);
+		Square sq = static_cast<Square>(index);
+		Bitboard attackTargets = knightAttackTable[index];
+		while (attackTargets) {
+			int attackedIndex = std::countr_zero(attackTargets);
+			Square attackedSquare = static_cast<Square>(attackedIndex);
+			auto attackedPiece = board.pieceAt(attackedSquare);
+
+			if (attackedPiece) {
+				if (attackedPiece->color != color) {
+					moves.push_back(Move{
+					    .from = sq,
+					    .to = attackedSquare,
+					    .piece = Piece::Knight,
+					    .capturedPiece = attackedPiece->piece,
+					    .promotionPiece = Piece::None,
+					    .isEnPassant = false
+					});
+				}
+			} else {
+				moves.push_back(Move{
+					.from = sq,
+					.to = attackedSquare,
+					.piece = Piece::Knight,
+					.capturedPiece = Piece::None,
+					.promotionPiece = Piece::None,
+					.isEnPassant = false
+				});
+			}
+			
+			attackTargets &= attackTargets - 1;
+		}
+		knights &= knights - 1;
 	}
 	return moves;
 }
