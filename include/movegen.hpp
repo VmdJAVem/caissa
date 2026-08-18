@@ -40,11 +40,11 @@ constexpr std::array<std::array<Bitboard, 64>, 2> computePawnCaptureTable() {
 	}
 	return table;
 }
-constexpr std::array<std::array<Bitboard, 64>, 2> pawnCaptureTable = computePawnCaptureTable();
-
 constexpr std::array<Bitboard, 64> computeKnightAttackTable() {
 	std::array<Bitboard, 64> table{};
-	constexpr std::array<std::pair<int, int>, 8> offsets = {{{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
+	constexpr std::array<std::pair<int, int>, 8> offsets = {{
+		{1, 2}, {2, 1}, {2, -1}, {1, -2},
+		{-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
 	for (int i = 0; i < 64; i++) {
 		int file = i % 8;
 		int rank = i / 8;
@@ -58,14 +58,32 @@ constexpr std::array<Bitboard, 64> computeKnightAttackTable() {
 			}
 		}
 	}
-	// For each square 0-63:
-	//   compute file, rank
-	//   for each of the 8 (df, dr) offsets:
-	//     compute newFile, newRank
-	//     if both in bounds: OR in the bit for that resulting square
 	return table;
 }
+constexpr std::array<Bitboard, 64> computeKingAttackTable() {
+	std::array<Bitboard, 64> table{};
+	constexpr std::array<std::pair<int, int>, 8> offsets = {{
+		{0, 1}, {1, 1}, {1, 0}, {1, -1},
+		{0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
+	for (int i = 0; i < 64; i++) {
+		int file = i % 8;
+		int rank = i / 8;
+		for (auto &[fileOffset, rankOffset] : offsets) {
+			int newFile = file + fileOffset;
+			int newRank = rank + rankOffset;
+
+			if (newFile < 8 && newFile >= 0 && newRank < 8 && newRank >= 0) {
+				Square sq = static_cast<Square>(newRank * 8 + newFile);
+				table[i] |= squareToBitboard(sq);
+			}
+		}
+	}
+	return table;
+}
+inline constexpr auto pawnCaptureTable = computePawnCaptureTable();
 inline constexpr auto knightAttackTable = computeKnightAttackTable();
+inline constexpr auto kingAttackTable = computeKingAttackTable();
 
 std::vector<Move> generatePawnMoves(const Board &board, Color color);
 std::vector<Move> generateKnightMoves(const Board &board, Color color);
+std::vector<Move> generateKingMoves(const Board &board, Color color);

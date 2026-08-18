@@ -143,3 +143,44 @@ std::vector<Move> generateKnightMoves(const Board &board, Color color) {
 	}
 	return moves;
 }
+// TODO: Castling
+std::vector<Move> generateKingMoves(const Board &board, Color color) {
+	std::vector<Move> moves{};
+	Bitboard kings = board.getPieces(color, Piece::King);
+	while (kings) {
+		int index = std::countr_zero(kings);
+		Square sq = static_cast<Square>(index);
+		Bitboard attackTargets = kingAttackTable[index];
+		while (attackTargets) {
+			int attackedIndex = std::countr_zero(attackTargets);
+			Square attackedSquare = static_cast<Square>(attackedIndex);
+			auto attackedPiece = board.pieceAt(attackedSquare);
+
+			if (attackedPiece) {
+				if (attackedPiece->color != color) {
+					moves.push_back(Move{
+						.from = sq,
+						.to = attackedSquare,
+						.piece = Piece::King,
+						.capturedPiece = attackedPiece->piece,
+						.promotionPiece = Piece::None,
+						.isEnPassant = false
+					});
+				}
+			} else {
+				moves.push_back(Move{
+					.from = sq,
+					.to = attackedSquare,
+					.piece = Piece::King,
+					.capturedPiece = Piece::None,
+					.promotionPiece = Piece::None,
+					.isEnPassant = false
+				});
+			}
+			
+			attackTargets &= attackTargets - 1;
+		}
+		kings &= kings - 1;
+	}
+	return moves;
+}
