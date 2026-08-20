@@ -15,6 +15,10 @@ Color Board::sideToMove() const { return m_sideToMove; }
 Square Board::getEnPassantTarget () const {
 	return m_enPassantTarget;
 }
+
+CastlingRights Board::getCastlingRights() const{
+	return m_castlingRights;
+}
 Board::Board() {
 	for (int i = static_cast<int>(Square::A2); i <= static_cast<int>(Square::H2); ++i) {
 		Square sq = static_cast<Square>(i);

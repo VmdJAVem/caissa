@@ -3,4 +3,4 @@ Language: Cpp
 IndentWidth: 8
 TabWidth: 8
 UseTab: Always
-ColumnLimit: 0
+ColumnLimit: 80
