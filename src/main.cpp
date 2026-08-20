@@ -36,8 +36,8 @@ int main(void) {
 	// 	if (m.promotionPiece != Piece::None) std::cout << " (promotes)";
 	// 	std::cout << "\n";
 	// }
-	auto moves = generateRookMoves(b, Color::White);
-	std::cout << "Rooks:\n";
+	auto moves = generateBishopMoves(b, Color::White);
+	std::cout << "Bishops:\n";
 	 for (auto& m : moves) {
 	 	std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to);
 	 	if (m.capturedPiece != Piece::None) std::cout << " (capture)";

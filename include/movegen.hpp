@@ -88,5 +88,6 @@ std::vector<Move> generatePawnMoves(const Board &board, Color color);
 std::vector<Move> generateKnightMoves(const Board &board, Color color);
 std::vector<Move> generateKingMoves(const Board &board, Color color);
 std::vector<Move> generateRookMoves(const Board &board, Color color);
+std::vector<Move> generateBishopMoves(const Board &board, Color color);
 
 bool isSquareAttacked(const Board& board, Square sq, Color byColor);

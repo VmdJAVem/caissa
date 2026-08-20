@@ -132,6 +132,27 @@ Bitboard rookAttacksFrom(const Board &board, Square sq) {
 	return attacks;
 }
 
+Bitboard bishopAttacksFrom(const Board &board, Square sq) {
+	Bitboard attacks = 0;
+	int file = static_cast<int>(sq) % 8;
+	int rank = static_cast<int>(sq) / 8;
+	constexpr std::array<std::pair<int, int>, 4> directions = {{{1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
+
+	for (auto &[fileOffset, rankOffset] : directions) {
+		int newFile = file + fileOffset;
+		int newRank = rank + rankOffset;
+		while (newFile >= 0 && newFile <= 7 && newRank >= 0 && newRank <= 7) {
+			Square newSquare = static_cast<Square>(newRank * 8 + newFile);
+			attacks |= squareToBitboard(newSquare);
+			if (board.pieceAt(newSquare))
+				break;
+			newFile += fileOffset;
+			newRank += rankOffset;
+		}
+	}
+	return attacks;
+}
+
 // TODO: Bishop & Queen
 bool isSquareAttacked(const Board &board, Square sq, Color byColor) {
 	if (sq == Square::None)
@@ -150,6 +171,10 @@ bool isSquareAttacked(const Board &board, Square sq, Color byColor) {
 	
 	Bitboard enemyRooks = board.getPieces(byColor, Piece::Rook);
 	if (rookAttacksFrom(board, sq) & enemyRooks)
+		return true;
+
+	Bitboard enemyBishops = board.getPieces(byColor, Piece::Bishop);
+	if (bishopAttacksFrom(board, sq) & enemyBishops)
 		return true;
 	
 
@@ -246,7 +271,7 @@ std::vector<Move> generateRookMoves(const Board &board, Color color) {
 
 		while (reacheable) {
 			int targetIndex = std::countr_zero(reacheable);
-			Square target = static_cast<Square>(targetIndex);
+			auto target = static_cast<Square>(targetIndex);
 			auto atSquare = board.pieceAt(target);
 			if (!atSquare) {
 				moves.push_back(Move{
@@ -266,6 +291,44 @@ std::vector<Move> generateRookMoves(const Board &board, Color color) {
 		}
 
 		rooks &= rooks - 1;
+	}
+	return moves;
+}
+
+std::vector<Move> generateBishopMoves(const Board &board, Color color) {
+	std::vector<Move> moves;
+	Bitboard bishops = board.getPieces(color, Piece::Bishop);
+
+	while (bishops) {
+		int index = std::countr_zero(bishops);
+		auto from = static_cast<Square>(index);
+		Bitboard reacheable = bishopAttacksFrom(board, from);
+
+		while (reacheable) {
+			int targetIndex = std::countr_zero(reacheable);
+			auto target = static_cast<Square>(targetIndex);
+			auto atSquare = board.pieceAt(target);
+
+			if (!atSquare) {
+				moves.push_back(Move{
+				    .from = from,
+				    .to = target,
+				    .piece = Piece::Bishop,				    
+				});
+			} else if (atSquare->color != color) {
+				moves.push_back(Move{
+					.from = from,
+					.to = target,
+					.piece = Piece::Bishop,
+					.capturedPiece = atSquare->piece
+				});
+			}
+			
+			
+			reacheable &= reacheable - 1;
+		}
+		
+		bishops &= bishops - 1;
 	}
 	return moves;
 }
