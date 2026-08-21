@@ -5,48 +5,30 @@
 #include <sstream>
 #include <string>
 
-void Board::setPieces(Color c, Piece p, Bitboard value) {
-	m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value;
-}
-Bitboard Board::getPieces(Color c, Piece p) const {
-	return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)];
-}
+void Board::setPieces(Color c, Piece p, Bitboard value) { m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value; }
+Bitboard Board::getPieces(Color c, Piece p) const { return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)]; }
 Color Board::sideToMove() const { return m_sideToMove; }
-Square Board::getEnPassantTarget () const {
-	return m_enPassantTarget;
-}
+Square Board::getEnPassantTarget() const { return m_enPassantTarget; }
 
-CastlingRights Board::getCastlingRights() const{
-	return m_castlingRights;
-}
+CastlingRights Board::getCastlingRights() const { return m_castlingRights; }
 Board::Board() {
 	for (int i = static_cast<int>(Square::A2); i <= static_cast<int>(Square::H2); ++i) {
 		Square sq = static_cast<Square>(i);
-		setPieces(Color::White, Piece::Pawn,
-			  getPieces(Color::White, Piece::Pawn) |
-			      squareToBitboard(sq));
+		setPieces(Color::White, Piece::Pawn, getPieces(Color::White, Piece::Pawn) | squareToBitboard(sq));
 	}
 	for (int i = static_cast<int>(Square::A7); i <= static_cast<int>(Square::H7); ++i) {
 		Square sq = static_cast<Square>(i);
-		setPieces(Color::Black, Piece::Pawn,
-			  getPieces(Color::Black, Piece::Pawn) |
-			      squareToBitboard(sq));
+		setPieces(Color::Black, Piece::Pawn, getPieces(Color::Black, Piece::Pawn) | squareToBitboard(sq));
 	}
 
-	setPieces(Color::White, Piece::Knight,
-		  squareToBitboard(Square::B1) | squareToBitboard(Square::G1));
-	setPieces(Color::Black, Piece::Knight,
-		  squareToBitboard(Square::B8) | squareToBitboard(Square::G8));
+	setPieces(Color::White, Piece::Knight, squareToBitboard(Square::B1) | squareToBitboard(Square::G1));
+	setPieces(Color::Black, Piece::Knight, squareToBitboard(Square::B8) | squareToBitboard(Square::G8));
 
-	setPieces(Color::White, Piece::Bishop,
-		  squareToBitboard(Square::C1) | squareToBitboard(Square::F1));
-	setPieces(Color::Black, Piece::Bishop,
-		  squareToBitboard(Square::C8) | squareToBitboard(Square::F8));
+	setPieces(Color::White, Piece::Bishop, squareToBitboard(Square::C1) | squareToBitboard(Square::F1));
+	setPieces(Color::Black, Piece::Bishop, squareToBitboard(Square::C8) | squareToBitboard(Square::F8));
 
-	setPieces(Color::White, Piece::Rook,
-		  squareToBitboard(Square::A1) | squareToBitboard(Square::H1));
-	setPieces(Color::Black, Piece::Rook,
-		  squareToBitboard(Square::A8) | squareToBitboard(Square::H8));
+	setPieces(Color::White, Piece::Rook, squareToBitboard(Square::A1) | squareToBitboard(Square::H1));
+	setPieces(Color::Black, Piece::Rook, squareToBitboard(Square::A8) | squareToBitboard(Square::H8));
 
 	setPieces(Color::White, Piece::Queen, squareToBitboard(Square::D1));
 	setPieces(Color::Black, Piece::Queen, squareToBitboard(Square::D8));
@@ -121,9 +103,8 @@ Board Board::empty() {
 	return b;
 }
 
-void Board::placePiece(Color c, Piece p, Square sq) {
-	setPieces(c, p, getPieces(c, p) | squareToBitboard(sq));
-}
+void Board::placePiece(Color c, Piece p, Square sq) { setPieces(c, p, getPieces(c, p) | squareToBitboard(sq)); }
+void Board::removePiece(Color c, Piece p, Square sq) { setPieces(c, p, getPieces(c, p) & ~squareToBitboard(sq)); }
 
 std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 	std::istringstream iss(fen);
@@ -196,8 +177,7 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 				p = Piece::King;
 				break;
 			default:
-				return std::unexpected(
-				    "placement contains invalid piece letter");
+				return std::unexpected("placement contains invalid piece letter");
 			}
 			Square sq = static_cast<Square>(rank * 8 + file);
 			board.placePiece(color, p, sq);
@@ -221,12 +201,10 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 			board.m_castlingRights |= CastlingRights::BlackKingside;
 			break;
 		case 'Q':
-			board.m_castlingRights |=
-			    CastlingRights::WhiteQueenside;
+			board.m_castlingRights |= CastlingRights::WhiteQueenside;
 			break;
 		case 'q':
-			board.m_castlingRights |=
-			    CastlingRights::BlackQueenside;
+			board.m_castlingRights |= CastlingRights::BlackQueenside;
 			break;
 		case '-':
 			break;
@@ -234,7 +212,8 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 			return std::unexpected("castling is malformed");
 		}
 	}
-	if (enPassant == "-") board.m_enPassantTarget = Square::None;
+	if (enPassant == "-")
+		board.m_enPassantTarget = Square::None;
 	else if (enPassant.length() == 2) {
 		char fileChar = enPassant[0];
 		char rankChar = enPassant[1];
@@ -267,8 +246,7 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 			fileIndex = 7;
 			break;
 		default:
-			return std::unexpected(
-			    "enPassant has invalid file letter");
+			return std::unexpected("enPassant has invalid file letter");
 		}
 		Square enPassantSquare = static_cast<Square>(rankIndex * 8 + fileIndex);
 		board.m_enPassantTarget = enPassantSquare;
@@ -277,6 +255,4 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 	}
 	return board;
 }
-std::string Board::toFen() const {
-	return "TODO";
-}
+std::string Board::toFen() const { return "TODO"; }
