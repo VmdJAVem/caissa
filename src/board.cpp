@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "types.hpp"
 #include <cctype>
 #include <expected>
 #include <optional>
@@ -154,7 +155,7 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 		} else {
 			Color color = isupper(c) ? Color::White : Color::Black;
 			c = tolower(c); // make handling easier since we alredy
-					// how the color
+			// how the color
 
 			Piece p;
 			switch (c) {
@@ -255,4 +256,95 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 	}
 	return board;
 }
-std::string Board::toFen() const { return "TODO"; }
+std::string Board::toFen() const {
+	int rank = 7;
+	int file = 0;
+	std::string result;
+	while (rank >= 0) {
+		int emptyCount = 0;
+		while (file <= 7) {
+			auto sq = static_cast<Square>(rank * 8 + file);
+
+			auto sqab = pieceAt(sq);
+
+			if (sqab) {
+				if (emptyCount > 0) {
+					result += std::to_string(emptyCount);
+					emptyCount = 0;
+				}
+				char p;
+				switch (sqab->piece) {
+				case Piece::Pawn:
+					p = 'p';
+					break;
+				case Piece::Knight:
+					p = 'n';
+					break;
+				case Piece::Bishop:
+					p = 'b';
+					break;
+				case Piece::Rook:
+					p = 'r';
+					break;
+				case Piece::Queen:
+					p = 'q';
+					break;
+				case Piece::King:
+					p = 'k';
+					break;
+				default:
+					break;
+				}
+
+				if (sqab->color == Color::White)
+					p = static_cast<char>(toupper(p));
+				result += p;
+
+			} else {
+				++emptyCount;
+			}
+			++file;
+		}
+		if (emptyCount > 0)
+			result += std::to_string(emptyCount);
+		if (rank != 0)
+			result += '/';
+
+		file = 0;
+		--rank;
+	}
+
+	result += ' ';
+	result += (m_sideToMove == Color::White) ? 'w' : 'b';
+
+	result += ' ';
+
+	bool anyRights = false;
+	if ((m_castlingRights & CastlingRights::WhiteKingside) != CastlingRights::None) {
+		result += 'K';
+		anyRights = true;
+	}
+	if ((m_castlingRights & CastlingRights::WhiteQueenside) != CastlingRights::None) {
+		result += 'Q';
+		anyRights = true;
+	}
+	if ((m_castlingRights & CastlingRights::BlackKingside) != CastlingRights::None) {
+		result += 'k';
+		anyRights = true;
+	}
+	if ((m_castlingRights & CastlingRights::BlackQueenside) != CastlingRights::None) {
+		result += 'q';
+		anyRights = true;
+	}
+	if (!anyRights) 
+		result += '-';
+
+
+	result += ' ';
+	result += squareName(m_enPassantTarget);
+
+	result += ' ' + std::to_string(m_halfMoveClock);
+	result += ' ' + std::to_string(m_fullMoveNumber);
+		
+	return result;
+}

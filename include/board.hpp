@@ -38,7 +38,7 @@ constexpr Square bitboardToSquare(Bitboard bb) {
 }
 constexpr std::string squareName(Square sq) {
 	if (sq == Square::None) {
-		return "none";
+		return "-";
 	}
 	auto index = static_cast<int>(sq);
 	int file = index % 8;
