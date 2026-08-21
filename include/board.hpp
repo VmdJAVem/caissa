@@ -11,7 +11,7 @@ public:
 	std::string toString() const;
 	Bitboard getPieces(Color c, Piece p) const;
 	void setPieces(Color c, Piece p, Bitboard value);
-	Color sideToMove() const;
+	Color getSideToMove() const;
 	void placePiece(Color c, Piece p, Square sq);
 	void removePiece(Color c, Piece p, Square sq);
 	CastlingRights getCastlingRights() const;
@@ -50,3 +50,4 @@ constexpr std::string squareName(Square sq) {
 
 	return std::string(1, fileChar) + std::string(1, rankChar);
 }
+Square findKing(const Board& board, Color color);

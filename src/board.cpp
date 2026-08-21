@@ -1,5 +1,6 @@
 #include "board.hpp"
 #include "types.hpp"
+#include <cassert>
 #include <cctype>
 #include <expected>
 #include <optional>
@@ -8,8 +9,14 @@
 
 void Board::setPieces(Color c, Piece p, Bitboard value) { m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value; }
 Bitboard Board::getPieces(Color c, Piece p) const { return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)]; }
-Color Board::sideToMove() const { return m_sideToMove; }
+Color Board::getSideToMove() const { return m_sideToMove; }
 Square Board::getEnPassantTarget() const { return m_enPassantTarget; }
+Square findKing(const Board &board, Color color) {
+	Bitboard kingBitboard = board.getPieces(color, Piece::King);
+	assert(kingBitboard != 0);
+	int index = std::countr_zero(kingBitboard);
+	return static_cast<Square>(index);
+}
 
 CastlingRights Board::getCastlingRights() const { return m_castlingRights; }
 Board::Board() {
@@ -336,15 +343,14 @@ std::string Board::toFen() const {
 		result += 'q';
 		anyRights = true;
 	}
-	if (!anyRights) 
+	if (!anyRights)
 		result += '-';
-
 
 	result += ' ';
 	result += squareName(m_enPassantTarget);
 
 	result += ' ' + std::to_string(m_halfMoveClock);
 	result += ' ' + std::to_string(m_fullMoveNumber);
-		
+
 	return result;
 }
