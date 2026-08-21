@@ -21,6 +21,7 @@ public:
 	std::string toFen() const;
 	Square getEnPassantTarget() const;
 	UndoInfo makeMove(Move move);
+	void unmakeMove(Move move, UndoInfo undo);
 private:
 	std::array<std::array<Bitboard, 6>, 2> m_bitboards;
 	Color m_sideToMove = Color::White;

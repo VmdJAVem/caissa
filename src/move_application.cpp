@@ -98,3 +98,52 @@ UndoInfo Board::makeMove(Move move) {
 	m_sideToMove = opposite;
 	return undo;
 }
+void Board::unmakeMove(Move move, UndoInfo undo) {
+	Color moverColor = m_sideToMove == Color::White ? Color::Black : Color::White;
+
+	if (move.capturedPiece != Piece::None && !move.isEnPassant) {
+		placePiece(m_sideToMove, move.capturedPiece, move.to);
+	} else if (move.isEnPassant) {
+		int capturedPawnIndex = (moverColor == Color::White) ? static_cast<int>(move.to) - 8 : static_cast<int>(move.to) + 8;
+		placePiece(m_sideToMove, Piece::Pawn, static_cast<Square>(capturedPawnIndex));
+	}
+
+	if (move.isCastling) {
+		switch (move.to) {
+		case Square::G1:
+			removePiece(moverColor, Piece::Rook, Square::F1);
+			placePiece(moverColor, Piece::Rook, Square::H1);
+			break;
+		case Square::C1:
+			removePiece(moverColor, Piece::Rook, Square::D1);
+			placePiece(moverColor, Piece::Rook, Square::A1);
+			break;
+		case Square::G8:
+			removePiece(moverColor, Piece::Rook, Square::F8);
+			placePiece(moverColor, Piece::Rook, Square::H8);
+			break;
+		case Square::C8:
+			placePiece(moverColor, Piece::Rook, Square::A8);
+			removePiece(moverColor, Piece::Rook, Square::D8);
+			break;
+		default:
+			assert(false);
+			break;
+		}		
+	}
+
+	if (moverColor == Color::Black)
+		--m_fullMoveNumber;
+
+	if (move.promotionPiece != Piece::None) 
+		removePiece(moverColor, move.promotionPiece, move.to);
+	else 
+		removePiece(moverColor, move.piece, move.to);
+	
+	placePiece(moverColor, move.piece, move.from);
+
+	m_enPassantTarget = undo.previousEnPassantTarget;
+	m_halfMoveClock = undo.previousHalfMoveClock;
+	m_castlingRights = undo.previousCastlingRights;
+	m_sideToMove = moverColor;
+}

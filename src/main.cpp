@@ -1,45 +1,37 @@
 #include <iostream>
-#include <random>
+#include <string>
+#include <vector>
+#include "types.hpp"
+#include "moves.hpp"
+#include "tests.hpp"
 
-#include "board.hpp"
-#include "movegen.hpp"
+int main() {
+	std::vector<RoundTripCase> cases = {
+		// 1. quiet move
+		{"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+		 Move{.from = Square::G1, .to = Square::F3, .piece = Piece::Knight}},
 
-int main(void) {
+		// 2. capture
+		{"rnbqkbnr/pppp1ppp/8/4p3/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2",
+		 Move{.from = Square::D4, .to = Square::E5, .piece = Piece::Pawn, .capturedPiece = Piece::Pawn}},
 
-	std::string line;
-	std::getline(std::cin, line);
+		// 3. en passant
+		{"rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 2",
+		 Move{.from = Square::D4, .to = Square::E3, .piece = Piece::Pawn, .capturedPiece = Piece::Pawn, .isEnPassant = true}},
 
-	auto eb = Board::fromFen(line);
-	Board b;
+		// 4. castling
+		{"r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1",
+		 Move{.from = Square::E1, .to = Square::G1, .piece = Piece::King, .isCastling = true}},
 
-	if (eb.has_value()) {
-		std::cout << "FEN STRING: " << line << "\n";
-		b = eb.value();
-	} else {
-		std::cout << "FEN error: " << eb.error() << "\n";
-		return -1;
-	}
+		// 5. promotion
+		{"8/P7/8/8/4k3/8/8/4K3 w - - 0 1",
+		 Move{.from = Square::A7, .to = Square::A8, .piece = Piece::Pawn, .promotionPiece = Piece::Queen}},
 
-	if (b.toFen() != line) {
-		std::cout << "toFen() is wrong\n";
-		return 1;
-	} else {
-		std::cout << "toFen() is right\n";
-		return 0;
-	}
-	
-	/*
+		// 6. rook capture affecting rights
+		{"r3k3/8/8/8/8/8/8/R3K2R w KQq - 0 1",
+		 Move{.from = Square::A1, .to = Square::A8, .piece = Piece::Rook, .capturedPiece = Piece::Rook}},
+	};
 
-	std::cout << b.toString();
-	auto moves = generateAllMoves(b);
-
-	std::random_device rd;                          // seed source (true randomness from the OS, when available)
-	std::mt19937 gen(rd());                          // a good general-purpose PRNG (Mersenne Twister), seeded once
-	std::uniform_int_distribution<int> dist(0, moves.size() - 1); // inclusive range [0, x-1]
-
-	int r = dist(gen);
-	auto move = moves[r];
-	auto x = b.makeMove(move);
-	std::cout << b.toString();
-	*/
+	testRoundTrip(cases);
+	return 0;
 }
