@@ -350,7 +350,7 @@ std::vector<Move> generateQueenMoves(const Board &board, Color color) {
 }
 
 std::vector<Move> generateAllMoves(const Board &board) {
-	auto color = board.sideToMove();
+	auto color = board.getSideToMove();
 	auto pawns = generatePawnMoves(board, color);
 	auto knights = generateKnightMoves(board, color);
 	auto bishops = generateBishopMoves(board, color);
@@ -368,4 +368,24 @@ std::vector<Move> generateAllMoves(const Board &board) {
 	allMoves.insert(allMoves.end(), kings.begin(), kings.end());
 	
 	return allMoves;
+}
+
+std::vector<Move> generateAllLegalMoves(Board &board) {
+	auto pseudoLegalMoves = generateAllMoves(board);
+	std::vector<Move> legalMoves;
+	auto color = board.getSideToMove();
+	auto oppositeColor = color == Color::White ? Color::Black : Color::White;
+
+	for (auto &m : pseudoLegalMoves) {
+		UndoInfo undo = board.makeMove(m);
+		Square kingSquare = findKing(board, color);
+
+		if (!isSquareAttacked(board, kingSquare, oppositeColor)) {
+			legalMoves.push_back(m);
+		}
+		
+		board.unmakeMove(m, undo);
+	}
+	
+	return legalMoves;
 }
