@@ -152,8 +152,8 @@ Bitboard bishopAttacksFrom(const Board &board, Square sq) {
 	}
 	return attacks;
 }
+Bitboard queenAttacksFrom(const Board &board, Square sq) { return rookAttacksFrom(board, sq) | bishopAttacksFrom(board, sq); }
 
-// TODO: Bishop & Queen
 bool isSquareAttacked(const Board &board, Square sq, Color byColor) {
 	if (sq == Square::None)
 		return false; // not sure about what to do
@@ -168,7 +168,7 @@ bool isSquareAttacked(const Board &board, Square sq, Color byColor) {
 	auto opposite = byColor == Color::White ? Color::Black : Color::White;
 	if (pawnCaptureTable[static_cast<int>(opposite)][static_cast<int>(sq)] & enemyPawns)
 		return true;
-	
+
 	Bitboard enemyRooks = board.getPieces(byColor, Piece::Rook);
 	if (rookAttacksFrom(board, sq) & enemyRooks)
 		return true;
@@ -176,7 +176,9 @@ bool isSquareAttacked(const Board &board, Square sq, Color byColor) {
 	Bitboard enemyBishops = board.getPieces(byColor, Piece::Bishop);
 	if (bishopAttacksFrom(board, sq) & enemyBishops)
 		return true;
-	
+	Bitboard enemyQueens = board.getPieces(byColor, Piece::Queen);
+	if (queenAttacksFrom(board, sq) & enemyQueens)
+		return true;
 
 	return false;
 }
@@ -274,18 +276,9 @@ std::vector<Move> generateRookMoves(const Board &board, Color color) {
 			auto target = static_cast<Square>(targetIndex);
 			auto atSquare = board.pieceAt(target);
 			if (!atSquare) {
-				moves.push_back(Move{
-				    .from = from,
-				    .to = target,
-				    .piece = Piece::Rook
-				});
+				moves.push_back(Move{.from = from, .to = target, .piece = Piece::Rook});
 			} else if (atSquare->color != color) {
-				moves.push_back(Move{
-				    .from = from,
-				    .to = target,
-				    .piece = Piece::Rook,
-				    .capturedPiece = atSquare->piece
-				});
+				moves.push_back(Move{.from = from, .to = target, .piece = Piece::Rook, .capturedPiece = atSquare->piece});
 			}
 			reacheable &= reacheable - 1;
 		}
@@ -313,22 +306,66 @@ std::vector<Move> generateBishopMoves(const Board &board, Color color) {
 				moves.push_back(Move{
 				    .from = from,
 				    .to = target,
-				    .piece = Piece::Bishop,				    
+				    .piece = Piece::Bishop,
 				});
 			} else if (atSquare->color != color) {
-				moves.push_back(Move{
-					.from = from,
-					.to = target,
-					.piece = Piece::Bishop,
-					.capturedPiece = atSquare->piece
-				});
+				moves.push_back(Move{.from = from, .to = target, .piece = Piece::Bishop, .capturedPiece = atSquare->piece});
 			}
-			
-			
+
 			reacheable &= reacheable - 1;
 		}
-		
+
 		bishops &= bishops - 1;
 	}
 	return moves;
+}
+std::vector<Move> generateQueenMoves(const Board &board, Color color) {
+	std::vector<Move> moves;
+	Bitboard queens = board.getPieces(color, Piece::Queen);
+	while (queens) {
+		int index = std::countr_zero(queens);
+		auto from = static_cast<Square>(index);
+		Bitboard reacheable = queenAttacksFrom(board, from);
+
+		while (reacheable) {
+			int targetIndex = std::countr_zero(reacheable);
+			auto target = static_cast<Square>(targetIndex);
+			auto atSquare = board.pieceAt(target);
+
+			if (!atSquare) {
+				moves.push_back(Move{
+				    .from = from,
+				    .to = target,
+				    .piece = Piece::Queen,
+				});
+			} else if (atSquare->color != color) {
+				moves.push_back(Move{.from = from, .to = target, .piece = Piece::Queen, .capturedPiece = atSquare->piece});
+			}
+
+			reacheable &= reacheable - 1;
+		}
+		queens &= queens - 1;
+	}
+	return moves;
+}
+
+std::vector<Move> generateAllMoves(const Board &board) {
+	auto color = board.sideToMove();
+	auto pawns = generatePawnMoves(board, color);
+	auto knights = generateKnightMoves(board, color);
+	auto bishops = generateBishopMoves(board, color);
+	auto rooks = generateRookMoves(board, color);
+	auto queens = generateQueenMoves(board, color);
+	auto kings = generateKingMoves(board, color);
+
+	std::vector<Move> allMoves{};
+
+	allMoves.insert(allMoves.end(), pawns.begin(), pawns.end());
+	allMoves.insert(allMoves.end(), knights.begin(), knights.end());
+	allMoves.insert(allMoves.end(), bishops.begin(), bishops.end());
+	allMoves.insert(allMoves.end(), rooks.begin(), rooks.end());
+	allMoves.insert(allMoves.end(), queens.begin(), queens.end());
+	allMoves.insert(allMoves.end(), kings.begin(), kings.end());
+	
+	return allMoves;
 }
