@@ -94,4 +94,6 @@ std::vector<Move> generateQueenMoves(const Board &board, Color color);
 std::vector<Move> generateAllMoves(const Board &board);
 std::vector<Move> generateAllLegalMoves(Board &board);
 
+int perft(Board &board, int depth);
+
 bool isSquareAttacked(const Board& board, Square sq, Color byColor);

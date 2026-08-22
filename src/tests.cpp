@@ -4,6 +4,8 @@
 #include "types.hpp"
 #include "board.hpp"
 #include "tests.hpp"
+#include "movegen.hpp"
+#include "evaluation.hpp"
 
 void testMove(const std::string& startFen, Move move, const std::string& expectedFen) {
 	auto result = Board::fromFen(startFen);
@@ -46,4 +48,47 @@ void testRoundTrip(const std::vector<RoundTripCase>& cases) {
 		}
 	}
 	std::cout << passed << "/" << cases.size() << " passed\n";
+}
+void testLegalMoves(const std::string& fen, const std::vector<std::pair<Square, Square>>& expected) {
+	auto result = Board::fromFen(fen);
+	if (!result.has_value()) {
+		std::cout << "FAIL (bad FEN): " << result.error() << "\n";
+		return;
+	}
+	Board board = result.value();
+	auto legalMoves = generateAllLegalMoves(board);
+
+	std::cout << "FEN: " << fen << "\n";
+	std::cout << "Legal moves found: " << legalMoves.size() << " (expected " << expected.size() << ")\n";
+	for (auto& m : legalMoves) {
+		std::cout << "  " << squareName(m.from) << " -> " << squareName(m.to) << "\n";
+	}
+
+	if (legalMoves.size() != expected.size()) {
+		std::cout << "FAIL: count mismatch\n";
+		return;
+	}
+	for (auto& [from, to] : expected) {
+		bool found = false;
+		for (auto& m : legalMoves) {
+			if (m.from == from && m.to == to) { found = true; break; }
+		}
+		if (!found) {
+			std::cout << "FAIL: expected move " << squareName(from) << " -> " << squareName(to) << " not found\n";
+			return;
+		}
+	}
+	std::cout << "PASS\n";
+}
+void testEvaluate(const std::string& fen, int expected) {
+	auto result = Board::fromFen(fen);
+	if (!result.has_value()) {
+		std::cout << "FAIL (bad FEN): " << result.error() << "\n";
+		return;
+	}
+	Board board = result.value();
+	int actual = evaluate(board);
+	std::cout << "FEN: " << fen << "\n";
+	std::cout << "  expected: " << expected << ", actual: " << actual;
+	std::cout << (actual == expected ? "  PASS" : "  FAIL") << "\n";
 }

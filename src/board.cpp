@@ -1,4 +1,5 @@
 #include "board.hpp"
+#include "movegen.hpp"
 #include "types.hpp"
 #include <cassert>
 #include <cctype>
@@ -6,6 +7,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <vector>
 
 void Board::setPieces(Color c, Piece p, Bitboard value) { m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value; }
 Bitboard Board::getPieces(Color c, Piece p) const { return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)]; }
@@ -353,4 +355,15 @@ std::string Board::toFen() const {
 	result += ' ' + std::to_string(m_fullMoveNumber);
 
 	return result;
+}
+
+GameResult getGameResult(Board &board, const std::vector<Move> &legalMoves) {
+	if (!legalMoves.empty())
+		return GameResult::InProgress;
+
+	Color mover = board.getSideToMove();
+	Square kingSquare = findKing(board, mover);
+	Color enemy = (mover == Color::White) ? Color::Black : Color::White;
+
+	return isSquareAttacked(board, kingSquare, enemy) ? GameResult::Checkmate : GameResult::Stalemate;
 }

@@ -389,3 +389,18 @@ std::vector<Move> generateAllLegalMoves(Board &board) {
 	
 	return legalMoves;
 }
+
+int perft(Board &board, int depth) {
+	if (depth == 0)
+		return 1;
+	int total = 0;
+
+	auto moves = generateAllLegalMoves(board);
+
+	for (auto &m : moves) {
+		auto undo = board.makeMove(m);
+		total += perft(board, depth - 1);
+		board.unmakeMove(m, undo);
+	}
+	return total;
+}

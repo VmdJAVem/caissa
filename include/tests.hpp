@@ -11,3 +11,5 @@ struct RoundTripCase {
 	Move move;
 };
 void testRoundTrip(const std::vector<RoundTripCase>& cases);
+void testLegalMoves(const std::string &fen, const std::vector<std::pair<Square, Square>> &expected);
+void testEvaluate(const std::string& fen, int expected);
