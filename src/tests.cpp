@@ -6,6 +6,7 @@
 #include "tests.hpp"
 #include "movegen.hpp"
 #include "evaluation.hpp"
+#include "search.hpp"
 
 void testMove(const std::string& startFen, Move move, const std::string& expectedFen) {
 	auto result = Board::fromFen(startFen);
@@ -82,7 +83,7 @@ void testLegalMoves(const std::string& fen, const std::vector<std::pair<Square, 
 }
 void testEvaluate(const std::string& fen, int expected) {
 	auto result = Board::fromFen(fen);
-	if (!result.has_value()) {
+	if (!result) {
 		std::cout << "FAIL (bad FEN): " << result.error() << "\n";
 		return;
 	}
@@ -91,4 +92,27 @@ void testEvaluate(const std::string& fen, int expected) {
 	std::cout << "FEN: " << fen << "\n";
 	std::cout << "  expected: " << expected << ", actual: " << actual;
 	std::cout << (actual == expected ? "  PASS" : "  FAIL") << "\n";
+}
+void testNegamax(const std::string& fen, int depth, Square expectedFrom, Square expectedTo) {
+	auto result = Board::fromFen(fen);
+	if (!result.has_value()) {
+		std::cout << "FAIL (bad FEN): " << result.error() << "\n";
+		return;
+	}
+	Board board = result.value();
+	auto bestMove = negamax(board, depth);
+
+	if (!bestMove.has_value()) {
+		std::cout << "FAIL: no move returned\n";
+		return;
+	}
+
+	std::cout << "FEN: " << fen << "\n";
+	std::cout << "  chosen: " << squareName(bestMove->from) << " -> " << squareName(bestMove->to) << "\n";
+
+	if (bestMove->from == expectedFrom && bestMove->to == expectedTo) {
+		std::cout << "  PASS\n";
+	} else {
+		std::cout << "  FAIL: expected " << squareName(expectedFrom) << " -> " << squareName(expectedTo) << "\n";
+	}
 }
