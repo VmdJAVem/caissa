@@ -4,17 +4,22 @@
 #include "moves.hpp"
 #include <vector>
 
-constexpr std::array<std::array<Bitboard, 64>, 2> computePawnPushTable() {
+constexpr std::array<std::array<Bitboard, 64>, 2> computePawnPushTable()
+{
 	std::array<std::array<Bitboard, 64>, 2> table{};
 	for (int i = 0; i < 64; i++) {
-		table[static_cast<int>(Color::White)][i] = (i + 8 < 64) ? (1ULL << (i + 8)) : 0;
-		table[static_cast<int>(Color::Black)][i] = (i - 8 >= 0) ? (1ULL << (i - 8)) : 0;
+		table[static_cast<int>(Color::White)][i] =
+		    (i + 8 < 64) ? (1ULL << (i + 8)) : 0;
+		table[static_cast<int>(Color::Black)][i] =
+		    (i - 8 >= 0) ? (1ULL << (i - 8)) : 0;
 	}
 	return table;
 }
-constexpr std::array<std::array<Bitboard, 64>, 2> pawnPushTable = computePawnPushTable();
+constexpr std::array<std::array<Bitboard, 64>, 2> pawnPushTable =
+    computePawnPushTable();
 
-constexpr std::array<std::array<Bitboard, 64>, 2> computePawnCaptureTable() {
+constexpr std::array<std::array<Bitboard, 64>, 2> computePawnCaptureTable()
+{
 	std::array<std::array<Bitboard, 64>, 2> table{};
 
 	for (int i = 0; i < 64; i++) {
@@ -40,11 +45,17 @@ constexpr std::array<std::array<Bitboard, 64>, 2> computePawnCaptureTable() {
 	}
 	return table;
 }
-constexpr std::array<Bitboard, 64> computeKnightAttackTable() {
+constexpr std::array<Bitboard, 64> computeKnightAttackTable()
+{
 	std::array<Bitboard, 64> table{};
-	constexpr std::array<std::pair<int, int>, 8> offsets = {{
-		{1, 2}, {2, 1}, {2, -1}, {1, -2},
-		{-1, -2}, {-2, -1}, {-2, 1}, {-1, 2}}};
+	constexpr std::array<std::pair<int, int>, 8> offsets = {{{1, 2},
+								 {2, 1},
+								 {2, -1},
+								 {1, -2},
+								 {-1, -2},
+								 {-2, -1},
+								 {-2, 1},
+								 {-1, 2}}};
 	for (int i = 0; i < 64; i++) {
 		int file = i % 8;
 		int rank = i / 8;
@@ -52,19 +63,27 @@ constexpr std::array<Bitboard, 64> computeKnightAttackTable() {
 			int newFile = file + fileOffset;
 			int newRank = rank + rankOffset;
 
-			if (newFile < 8 && newFile >= 0 && newRank < 8 && newRank >= 0) {
-				Square sq = static_cast<Square>(newRank * 8 + newFile);
+			if (newFile < 8 && newFile >= 0 && newRank < 8 &&
+			    newRank >= 0) {
+				Square sq =
+				    static_cast<Square>(newRank * 8 + newFile);
 				table[i] |= squareToBitboard(sq);
 			}
 		}
 	}
 	return table;
 }
-constexpr std::array<Bitboard, 64> computeKingAttackTable() {
+constexpr std::array<Bitboard, 64> computeKingAttackTable()
+{
 	std::array<Bitboard, 64> table{};
-	constexpr std::array<std::pair<int, int>, 8> offsets = {{
-		{0, 1}, {1, 1}, {1, 0}, {1, -1},
-		{0, -1}, {-1, -1}, {-1, 0}, {-1, 1}}};
+	constexpr std::array<std::pair<int, int>, 8> offsets = {{{0, 1},
+								 {1, 1},
+								 {1, 0},
+								 {1, -1},
+								 {0, -1},
+								 {-1, -1},
+								 {-1, 0},
+								 {-1, 1}}};
 	for (int i = 0; i < 64; i++) {
 		int file = i % 8;
 		int rank = i / 8;
@@ -72,8 +91,10 @@ constexpr std::array<Bitboard, 64> computeKingAttackTable() {
 			int newFile = file + fileOffset;
 			int newRank = rank + rankOffset;
 
-			if (newFile < 8 && newFile >= 0 && newRank < 8 && newRank >= 0) {
-				Square sq = static_cast<Square>(newRank * 8 + newFile);
+			if (newFile < 8 && newFile >= 0 && newRank < 8 &&
+			    newRank >= 0) {
+				Square sq =
+				    static_cast<Square>(newRank * 8 + newFile);
 				table[i] |= squareToBitboard(sq);
 			}
 		}
@@ -96,4 +117,5 @@ std::vector<Move> generateAllLegalMoves(Board &board);
 
 int perft(Board &board, int depth);
 
-bool isSquareAttacked(const Board& board, Square sq, Color byColor);
+bool isSquareAttacked(const Board &board, Square sq, Color byColor);
+Square findKing(const Board &board, Color color);

@@ -1,17 +1,24 @@
 #include "board.hpp"
 #include <cassert>
 
-UndoInfo Board::makeMove(Move move) {
-	UndoInfo undo = {.previousCastlingRights = m_castlingRights, .previousEnPassantTarget = m_enPassantTarget, .previousHalfMoveClock = m_halfMoveClock};
-	Color opposite = m_sideToMove == Color::White ? Color::Black : Color::White;
+UndoInfo Board::makeMove(Move move)
+{
+	UndoInfo undo = {.previousCastlingRights = m_castlingRights,
+			 .previousEnPassantTarget = m_enPassantTarget,
+			 .previousHalfMoveClock = m_halfMoveClock};
+	Color opposite =
+	    m_sideToMove == Color::White ? Color::Black : Color::White;
 	m_enPassantTarget = Square::None;
-	
+
 	if (move.capturedPiece != Piece::None && !move.isEnPassant) {
 		removePiece(opposite, move.capturedPiece, move.to);
 		m_halfMoveClock = 0;
 	} else if (move.isEnPassant) {
-		int capturedPawnIndex = (m_sideToMove == Color::White) ? static_cast<int>(move.to) - 8 : static_cast<int>(move.to) + 8;
-		removePiece(opposite, Piece::Pawn, static_cast<Square>(capturedPawnIndex));
+		int capturedPawnIndex = (m_sideToMove == Color::White) ?
+					    static_cast<int>(move.to) - 8 :
+					    static_cast<int>(move.to) + 8;
+		removePiece(opposite, Piece::Pawn,
+			    static_cast<Square>(capturedPawnIndex));
 		m_halfMoveClock = 0;
 	} else if (move.piece == Piece::Pawn) {
 		m_halfMoveClock = 0;
@@ -19,7 +26,9 @@ UndoInfo Board::makeMove(Move move) {
 		int fromIndex = static_cast<int>(move.from);
 		int diff = toIndex - fromIndex;
 		if (diff == 16 || diff == -16) {
-			int enPassantIndex = (m_sideToMove == Color::White) ? toIndex - 8 : toIndex + 8;
+			int enPassantIndex = (m_sideToMove == Color::White) ?
+						 toIndex - 8 :
+						 toIndex + 8;
 			m_enPassantTarget = static_cast<Square>(enPassantIndex);
 		}
 	} else {
@@ -52,11 +61,12 @@ UndoInfo Board::makeMove(Move move) {
 
 	if (move.piece == Piece::King) {
 		if (m_sideToMove == Color::White)
-			m_castlingRights &= ~(CastlingRights::WhiteKingside | CastlingRights::WhiteQueenside);
+			m_castlingRights &= ~(CastlingRights::WhiteKingside |
+					      CastlingRights::WhiteQueenside);
 		else
-			m_castlingRights &= ~(CastlingRights::BlackKingside | CastlingRights::BlackQueenside);
-	}
-	else if (move.piece == Piece::Rook) {
+			m_castlingRights &= ~(CastlingRights::BlackKingside |
+					      CastlingRights::BlackQueenside);
+	} else if (move.piece == Piece::Rook) {
 		switch (move.from) {
 		case Square::A1:
 			m_castlingRights &= ~CastlingRights::WhiteQueenside;
@@ -77,18 +87,26 @@ UndoInfo Board::makeMove(Move move) {
 
 	if (move.capturedPiece == Piece::Rook) {
 		switch (move.to) {
-		case Square::A1: m_castlingRights &= ~CastlingRights::WhiteQueenside; break;
-		case Square::H1: m_castlingRights &= ~CastlingRights::WhiteKingside; break;
-		case Square::A8: m_castlingRights &= ~CastlingRights::BlackQueenside; break;
-		case Square::H8: m_castlingRights &= ~CastlingRights::BlackKingside; break;
-		default: break;
+		case Square::A1:
+			m_castlingRights &= ~CastlingRights::WhiteQueenside;
+			break;
+		case Square::H1:
+			m_castlingRights &= ~CastlingRights::WhiteKingside;
+			break;
+		case Square::A8:
+			m_castlingRights &= ~CastlingRights::BlackQueenside;
+			break;
+		case Square::H8:
+			m_castlingRights &= ~CastlingRights::BlackKingside;
+			break;
+		default:
+			break;
 		}
 	}
-	
+
 	if (move.promotionPiece != Piece::None) {
 		placePiece(m_sideToMove, move.promotionPiece, move.to);
-	}
-	else 
+	} else
 		placePiece(m_sideToMove, move.piece, move.to);
 	removePiece(m_sideToMove, move.piece, move.from);
 
@@ -98,14 +116,19 @@ UndoInfo Board::makeMove(Move move) {
 	m_sideToMove = opposite;
 	return undo;
 }
-void Board::unmakeMove(Move move, UndoInfo undo) {
-	Color moverColor = m_sideToMove == Color::White ? Color::Black : Color::White;
+void Board::unmakeMove(Move move, UndoInfo undo)
+{
+	Color moverColor =
+	    m_sideToMove == Color::White ? Color::Black : Color::White;
 
 	if (move.capturedPiece != Piece::None && !move.isEnPassant) {
 		placePiece(m_sideToMove, move.capturedPiece, move.to);
 	} else if (move.isEnPassant) {
-		int capturedPawnIndex = (moverColor == Color::White) ? static_cast<int>(move.to) - 8 : static_cast<int>(move.to) + 8;
-		placePiece(m_sideToMove, Piece::Pawn, static_cast<Square>(capturedPawnIndex));
+		int capturedPawnIndex = (moverColor == Color::White) ?
+					    static_cast<int>(move.to) - 8 :
+					    static_cast<int>(move.to) + 8;
+		placePiece(m_sideToMove, Piece::Pawn,
+			   static_cast<Square>(capturedPawnIndex));
 	}
 
 	if (move.isCastling) {
@@ -129,17 +152,17 @@ void Board::unmakeMove(Move move, UndoInfo undo) {
 		default:
 			assert(false);
 			break;
-		}		
+		}
 	}
 
 	if (moverColor == Color::Black)
 		--m_fullMoveNumber;
 
-	if (move.promotionPiece != Piece::None) 
+	if (move.promotionPiece != Piece::None)
 		removePiece(moverColor, move.promotionPiece, move.to);
-	else 
+	else
 		removePiece(moverColor, move.piece, move.to);
-	
+
 	placePiece(moverColor, move.piece, move.from);
 
 	m_enPassantTarget = undo.previousEnPassantTarget;

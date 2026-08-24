@@ -9,36 +9,57 @@
 #include <string>
 #include <vector>
 
-void Board::setPieces(Color c, Piece p, Bitboard value) { m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value; }
-Bitboard Board::getPieces(Color c, Piece p) const { return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)]; }
-Color Board::getSideToMove() const { return m_sideToMove; }
-Square Board::getEnPassantTarget() const { return m_enPassantTarget; }
-Square findKing(const Board &board, Color color) {
-	Bitboard kingBitboard = board.getPieces(color, Piece::King);
-	assert(kingBitboard != 0);
-	int index = std::countr_zero(kingBitboard);
-	return static_cast<Square>(index);
+void Board::setPieces(Color c, Piece p, Bitboard value)
+{
+	m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value;
 }
-
-CastlingRights Board::getCastlingRights() const { return m_castlingRights; }
-Board::Board() {
-	for (int i = static_cast<int>(Square::A2); i <= static_cast<int>(Square::H2); ++i) {
+Bitboard Board::getPieces(Color c, Piece p) const
+{
+	return m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)];
+}
+Color Board::getSideToMove() const
+{
+	return m_sideToMove;
+}
+Square Board::getEnPassantTarget() const
+{
+	return m_enPassantTarget;
+}
+CastlingRights Board::getCastlingRights() const
+{
+	return m_castlingRights;
+}
+Board::Board()
+{
+	for (int i = static_cast<int>(Square::A2);
+	     i <= static_cast<int>(Square::H2); ++i) {
 		Square sq = static_cast<Square>(i);
-		setPieces(Color::White, Piece::Pawn, getPieces(Color::White, Piece::Pawn) | squareToBitboard(sq));
+		setPieces(Color::White, Piece::Pawn,
+			  getPieces(Color::White, Piece::Pawn) |
+			      squareToBitboard(sq));
 	}
-	for (int i = static_cast<int>(Square::A7); i <= static_cast<int>(Square::H7); ++i) {
+	for (int i = static_cast<int>(Square::A7);
+	     i <= static_cast<int>(Square::H7); ++i) {
 		Square sq = static_cast<Square>(i);
-		setPieces(Color::Black, Piece::Pawn, getPieces(Color::Black, Piece::Pawn) | squareToBitboard(sq));
+		setPieces(Color::Black, Piece::Pawn,
+			  getPieces(Color::Black, Piece::Pawn) |
+			      squareToBitboard(sq));
 	}
 
-	setPieces(Color::White, Piece::Knight, squareToBitboard(Square::B1) | squareToBitboard(Square::G1));
-	setPieces(Color::Black, Piece::Knight, squareToBitboard(Square::B8) | squareToBitboard(Square::G8));
+	setPieces(Color::White, Piece::Knight,
+		  squareToBitboard(Square::B1) | squareToBitboard(Square::G1));
+	setPieces(Color::Black, Piece::Knight,
+		  squareToBitboard(Square::B8) | squareToBitboard(Square::G8));
 
-	setPieces(Color::White, Piece::Bishop, squareToBitboard(Square::C1) | squareToBitboard(Square::F1));
-	setPieces(Color::Black, Piece::Bishop, squareToBitboard(Square::C8) | squareToBitboard(Square::F8));
+	setPieces(Color::White, Piece::Bishop,
+		  squareToBitboard(Square::C1) | squareToBitboard(Square::F1));
+	setPieces(Color::Black, Piece::Bishop,
+		  squareToBitboard(Square::C8) | squareToBitboard(Square::F8));
 
-	setPieces(Color::White, Piece::Rook, squareToBitboard(Square::A1) | squareToBitboard(Square::H1));
-	setPieces(Color::Black, Piece::Rook, squareToBitboard(Square::A8) | squareToBitboard(Square::H8));
+	setPieces(Color::White, Piece::Rook,
+		  squareToBitboard(Square::A1) | squareToBitboard(Square::H1));
+	setPieces(Color::Black, Piece::Rook,
+		  squareToBitboard(Square::A8) | squareToBitboard(Square::H8));
 
 	setPieces(Color::White, Piece::Queen, squareToBitboard(Square::D1));
 	setPieces(Color::Black, Piece::Queen, squareToBitboard(Square::D8));
@@ -47,7 +68,8 @@ Board::Board() {
 	setPieces(Color::Black, Piece::King, squareToBitboard(Square::E8));
 }
 
-std::optional<PieceOnSquare> Board::pieceAt(Square sq) const {
+std::optional<PieceOnSquare> Board::pieceAt(Square sq) const
+{
 	if (sq == Square::None)
 		return std::nullopt;
 	Bitboard mask = squareToBitboard(sq);
@@ -62,7 +84,8 @@ std::optional<PieceOnSquare> Board::pieceAt(Square sq) const {
 	return std::nullopt; // empty square
 }
 
-std::string Board::toString() const {
+std::string Board::toString() const
+{
 	std::string out;
 	for (int rank = 7; rank >= 0; --rank) {
 		for (int file = 0; file < 8; ++file) {
@@ -103,7 +126,8 @@ std::string Board::toString() const {
 	return out;
 }
 
-Board Board::empty() {
+Board Board::empty()
+{
 	Board b;
 	for (Color c : allColors) {
 		for (Piece p : allPieces) {
@@ -113,10 +137,17 @@ Board Board::empty() {
 	return b;
 }
 
-void Board::placePiece(Color c, Piece p, Square sq) { setPieces(c, p, getPieces(c, p) | squareToBitboard(sq)); }
-void Board::removePiece(Color c, Piece p, Square sq) { setPieces(c, p, getPieces(c, p) & ~squareToBitboard(sq)); }
+void Board::placePiece(Color c, Piece p, Square sq)
+{
+	setPieces(c, p, getPieces(c, p) | squareToBitboard(sq));
+}
+void Board::removePiece(Color c, Piece p, Square sq)
+{
+	setPieces(c, p, getPieces(c, p) & ~squareToBitboard(sq));
+}
 
-std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
+std::expected<Board, std::string> Board::fromFen(const std::string &fen)
+{
 	std::istringstream iss(fen);
 
 	std::string placement, sideToMove, castling, enPassant;
@@ -187,7 +218,8 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 				p = Piece::King;
 				break;
 			default:
-				return std::unexpected("placement contains invalid piece letter");
+				return std::unexpected(
+				    "placement contains invalid piece letter");
 			}
 			Square sq = static_cast<Square>(rank * 8 + file);
 			board.placePiece(color, p, sq);
@@ -211,10 +243,12 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 			board.m_castlingRights |= CastlingRights::BlackKingside;
 			break;
 		case 'Q':
-			board.m_castlingRights |= CastlingRights::WhiteQueenside;
+			board.m_castlingRights |=
+			    CastlingRights::WhiteQueenside;
 			break;
 		case 'q':
-			board.m_castlingRights |= CastlingRights::BlackQueenside;
+			board.m_castlingRights |=
+			    CastlingRights::BlackQueenside;
 			break;
 		case '-':
 			break;
@@ -256,16 +290,19 @@ std::expected<Board, std::string> Board::fromFen(const std::string &fen) {
 			fileIndex = 7;
 			break;
 		default:
-			return std::unexpected("enPassant has invalid file letter");
+			return std::unexpected(
+			    "enPassant has invalid file letter");
 		}
-		Square enPassantSquare = static_cast<Square>(rankIndex * 8 + fileIndex);
+		Square enPassantSquare =
+		    static_cast<Square>(rankIndex * 8 + fileIndex);
 		board.m_enPassantTarget = enPassantSquare;
 	} else {
 		return std::unexpected("enPassant is malformed");
 	}
 	return board;
 }
-std::string Board::toFen() const {
+std::string Board::toFen() const
+{
 	int rank = 7;
 	int file = 0;
 	std::string result;
@@ -308,7 +345,6 @@ std::string Board::toFen() const {
 				if (sqab->color == Color::White)
 					p = static_cast<char>(toupper(p));
 				result += p;
-
 			} else {
 				++emptyCount;
 			}
@@ -329,19 +365,23 @@ std::string Board::toFen() const {
 	result += ' ';
 
 	bool anyRights = false;
-	if ((m_castlingRights & CastlingRights::WhiteKingside) != CastlingRights::None) {
+	if ((m_castlingRights & CastlingRights::WhiteKingside) !=
+	    CastlingRights::None) {
 		result += 'K';
 		anyRights = true;
 	}
-	if ((m_castlingRights & CastlingRights::WhiteQueenside) != CastlingRights::None) {
+	if ((m_castlingRights & CastlingRights::WhiteQueenside) !=
+	    CastlingRights::None) {
 		result += 'Q';
 		anyRights = true;
 	}
-	if ((m_castlingRights & CastlingRights::BlackKingside) != CastlingRights::None) {
+	if ((m_castlingRights & CastlingRights::BlackKingside) !=
+	    CastlingRights::None) {
 		result += 'k';
 		anyRights = true;
 	}
-	if ((m_castlingRights & CastlingRights::BlackQueenside) != CastlingRights::None) {
+	if ((m_castlingRights & CastlingRights::BlackQueenside) !=
+	    CastlingRights::None) {
 		result += 'q';
 		anyRights = true;
 	}
@@ -355,15 +395,4 @@ std::string Board::toFen() const {
 	result += ' ' + std::to_string(m_fullMoveNumber);
 
 	return result;
-}
-
-GameResult getGameResult(Board &board, const std::vector<Move> &legalMoves) {
-	if (!legalMoves.empty())
-		return GameResult::InProgress;
-
-	Color mover = board.getSideToMove();
-	Square kingSquare = findKing(board, mover);
-	Color enemy = (mover == Color::White) ? Color::Black : Color::White;
-
-	return isSquareAttacked(board, kingSquare, enemy) ? GameResult::Checkmate : GameResult::Stalemate;
 }

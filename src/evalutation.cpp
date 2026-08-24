@@ -1,7 +1,8 @@
 #include "board.hpp"
 #include "types.hpp"
 
-int evaluate(const Board &board) {
+int evaluate(const Board &board)
+{
 	auto color = board.getSideToMove();
 	auto enemyColor = color == Color::White ? Color::Black : Color::White;
 
@@ -13,16 +14,17 @@ int evaluate(const Board &board) {
 	    3, // Bishop
 	    5, // Rook
 	    9, // Queen
-	    0  // King
+	    0 // King
 	};
-	
 
 	for (auto &p : allPieces) {
 		auto pieces = board.getPieces(color, p);
 		auto enemyPieces = board.getPieces(enemyColor, p);
-		result += (pieceValues[static_cast<int>(p)] * std::popcount(pieces));
-		result -= (pieceValues[static_cast<int>(p)] * std::popcount(enemyPieces));
+		result +=
+		    (pieceValues[static_cast<int>(p)] * std::popcount(pieces));
+		result -= (pieceValues[static_cast<int>(p)] *
+			   std::popcount(enemyPieces));
 	}
-	
+
 	return result;
 }

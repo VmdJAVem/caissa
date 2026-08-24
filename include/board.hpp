@@ -1,12 +1,12 @@
 #pragma once
-#include <string>
-#include <expected>
 #include "moves.hpp"
-#include <optional>
 #include "types.hpp"
+#include <expected>
+#include <optional>
+#include <string>
 
 class Board {
-public:
+    public:
 	Board();
 	std::string toString() const;
 	Bitboard getPieces(Color c, Piece p) const;
@@ -17,12 +17,14 @@ public:
 	CastlingRights getCastlingRights() const;
 	std::optional<PieceOnSquare> pieceAt(Square sq) const;
 	static Board empty();
-	static std::expected<Board,std::string> fromFen(const std::string& fen);
+	static std::expected<Board, std::string>
+	fromFen(const std::string &fen);
 	std::string toFen() const;
 	Square getEnPassantTarget() const;
 	UndoInfo makeMove(Move move);
 	void unmakeMove(Move move, UndoInfo undo);
-private:
+
+    private:
 	std::array<std::array<Bitboard, 6>, 2> m_bitboards;
 	Color m_sideToMove = Color::White;
 	CastlingRights m_castlingRights = CastlingRights::All;
@@ -31,13 +33,16 @@ private:
 	int m_fullMoveNumber = 1;
 };
 
-constexpr Bitboard squareToBitboard(Square sq) {
+constexpr Bitboard squareToBitboard(Square sq)
+{
 	return 1ULL << static_cast<int>(sq);
 }
-constexpr Square bitboardToSquare(Bitboard bb) {
+constexpr Square bitboardToSquare(Bitboard bb)
+{
 	return static_cast<Square>(std::countr_zero(bb));
 }
-constexpr std::string squareName(Square sq) {
+constexpr std::string squareName(Square sq)
+{
 	if (sq == Square::None) {
 		return "-";
 	}
@@ -50,4 +55,4 @@ constexpr std::string squareName(Square sq) {
 
 	return std::string(1, fileChar) + std::string(1, rankChar);
 }
-Square findKing(const Board& board, Color color);
+Square findKing(const Board &board, Color color);

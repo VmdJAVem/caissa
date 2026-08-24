@@ -18,7 +18,9 @@ enum class Piece {
 
 	None
 };
-constexpr std::array<Piece, 6> allPieces = {Piece::Pawn, Piece::Knight, Piece::Bishop, Piece::Rook, Piece::Queen, Piece::King};
+constexpr std::array<Piece, 6> allPieces = {Piece::Pawn,   Piece::Knight,
+					    Piece::Bishop, Piece::Rook,
+					    Piece::Queen,  Piece::King};
 
 enum class Square : std::uint8_t {
 	A1,
@@ -96,27 +98,36 @@ struct PieceOnSquare {
 
 enum class CastlingRights : std::uint8_t {
 	None = 0,
-	WhiteKingside = 1 << 0,	 // 0b0001
+	WhiteKingside = 1 << 0, // 0b0001
 	WhiteQueenside = 1 << 1, // 0b0010
-	BlackKingside = 1 << 2,	 // 0b0100n
+	BlackKingside = 1 << 2, // 0b0100n
 	BlackQueenside = 1 << 3, // 0b1000
 	All = WhiteKingside | WhiteQueenside | BlackKingside | BlackQueenside
 };
 
-constexpr CastlingRights operator|(CastlingRights a, CastlingRights b) {
-	return static_cast<CastlingRights>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+constexpr CastlingRights operator|(CastlingRights a, CastlingRights b)
+{
+	return static_cast<CastlingRights>(static_cast<uint8_t>(a) |
+					   static_cast<uint8_t>(b));
 }
-constexpr CastlingRights operator|=(CastlingRights &a, CastlingRights b) {
+constexpr CastlingRights operator|=(CastlingRights &a, CastlingRights b)
+{
 	a = a | b;
 	return a;
 }
-constexpr CastlingRights operator&(CastlingRights a, CastlingRights b) {
-	return static_cast<CastlingRights>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+constexpr CastlingRights operator&(CastlingRights a, CastlingRights b)
+{
+	return static_cast<CastlingRights>(static_cast<uint8_t>(a) &
+					   static_cast<uint8_t>(b));
 }
-constexpr CastlingRights operator~(CastlingRights a) {
-	return static_cast<CastlingRights>(~static_cast<uint8_t>(a) & static_cast<uint8_t>(CastlingRights::All));
+constexpr CastlingRights operator~(CastlingRights a)
+{
+	return static_cast<CastlingRights>(
+	    ~static_cast<uint8_t>(a) &
+	    static_cast<uint8_t>(CastlingRights::All));
 }
-constexpr CastlingRights &operator&=(CastlingRights &a, CastlingRights b) {
+constexpr CastlingRights &operator&=(CastlingRights &a, CastlingRights b)
+{
 	a = a & b;
 	return a;
 }

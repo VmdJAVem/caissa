@@ -1,6 +1,6 @@
 #pragma once
 
-#include "moves.hpp"
 #include "board.hpp"
+#include "moves.hpp"
 
 std::optional<Move> negamax(Board &board, int depth);
