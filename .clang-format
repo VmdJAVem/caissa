@@ -31,7 +31,7 @@ BraceWrapping:
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
 BreakBeforeTernaryOperators: false
-ColumnLimit: 80
+ColumnLimit: 160
 IndentCaseLabels: false
 IndentWidth: 8
 IndentWrappedFunctionNames: false
@@ -40,3 +40,4 @@ SpaceBeforeParens: ControlStatementsExceptForEachMacros
 Standard: Latest
 TabWidth: 8
 UseTab: Always
+NamespaceIndentation: All

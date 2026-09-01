@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+import subprocess
+import time
+
+ENGINE_PATH = "../build/caissa"
+
+def time_depth(depth):
+    proc = subprocess.Popen(
+        [ENGINE_PATH],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+        bufsize=1,  # line-buffered
+    )
+
+    proc.stdin.write("position startpos\n")
+    proc.stdin.write(f"go depth {depth}\n")
+    proc.stdin.flush()
+
+    start = time.monotonic()
+    bestmove_line = None
+    while True:
+        line = proc.stdout.readline()
+        if not line:
+            break  # engine exited unexpectedly
+        if line.startswith("bestmove"):
+            bestmove_line = line.strip()
+            break
+    elapsed = time.monotonic() - start
+
+    proc.stdin.write("quit\n")
+    proc.stdin.flush()
+    proc.wait(timeout=5)
+
+    return elapsed, bestmove_line
+
+if __name__ == "__main__":
+    for depth in range(1, 6):
+        elapsed, result = time_depth(depth)
+        print(f"depth {depth}: {elapsed:.3f}s  ({result})")
