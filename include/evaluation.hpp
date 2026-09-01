@@ -1,5 +1,6 @@
 #pragma once
 #include "board.hpp"
+#include <vector>
 
 // eval.hpp — piece-square tables, indexed 0=A1 ... 63=H8, values from White's
 // perspective. Use mirrorSquare(index) to look these up for Black pieces.
@@ -46,4 +47,14 @@ constexpr std::array<int, 64> kingMidgamePST = {
 constexpr std::array<std::array<int, 64>, 6> pieceSquareTables = {
     pawnPST, knightPST, bishopPST, rookPST, queenPST, kingMidgamePST};
 
+constexpr std::array<int, 6> pieceValues = {
+    100, // Pawn
+    300, // Knight
+    300, // Bishop
+    500, // Rook
+    900, // Queen
+    0 // King
+};
+
 int evaluate(const Board &board);
+void sortAllMoves(std::vector<Move>& moves, const Board& board);

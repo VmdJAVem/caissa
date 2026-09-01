@@ -2,6 +2,7 @@
 #include "board.hpp"
 #include <cassert>
 #include <vector>
+#include "evaluation.hpp"
 
 std::vector<Move> generatePawnMoves(const Board &board, Color color)
 {
@@ -514,6 +515,8 @@ std::vector<Move> generateAllLegalMoves(Board &board)
 
 		board.unmakeMove(m, undo);
 	}
+
+	sortAllMoves(legalMoves, board);
 
 	return legalMoves;
 }
