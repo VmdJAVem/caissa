@@ -35,6 +35,6 @@ def time_depth(depth):
     return elapsed, bestmove_line
 
 if __name__ == "__main__":
-    for depth in range(1, 6):
+    for depth in range(1, 5):
         elapsed, result = time_depth(depth)
         print(f"depth {depth}: {elapsed:.3f}s  ({result})")
