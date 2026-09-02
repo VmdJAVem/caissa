@@ -4,5 +4,5 @@ This is a re-write of my c project [[https://github.com/VmdJAVem/supplyCat][supp
 learning c++.
 
 * Todo
-- +Refactor =pieceAt= hotpath.+
-- more complete UCI support (play by time, ponder, etc.).
+- [X] Refactor =pieceAt= hotpath.
+- [ ] more complete UCI support (play by time, ponder, etc.).
