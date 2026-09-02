@@ -119,14 +119,20 @@ UndoInfo Board::makeMove(Move move)
 void Board::unmakeMove(Move move, UndoInfo undo)
 {
 	Color moverColor =
-	    m_sideToMove == Color::White ? Color::Black : Color::White;
+		m_sideToMove == Color::White ? Color::Black : Color::White;
+	
+	if (move.promotionPiece != Piece::None)
+		removePiece(moverColor, move.promotionPiece, move.to);
+	else
+		removePiece(moverColor, move.piece, move.to);
+	placePiece(moverColor, move.piece, move.from);
 
 	if (move.capturedPiece != Piece::None && !move.isEnPassant) {
 		placePiece(m_sideToMove, move.capturedPiece, move.to);
 	} else if (move.isEnPassant) {
 		int capturedPawnIndex = (moverColor == Color::White) ?
-					    static_cast<int>(move.to) - 8 :
-					    static_cast<int>(move.to) + 8;
+					static_cast<int>(move.to) - 8 :
+					static_cast<int>(move.to) + 8;
 		placePiece(m_sideToMove, Piece::Pawn,
 			   static_cast<Square>(capturedPawnIndex));
 	}
@@ -157,13 +163,6 @@ void Board::unmakeMove(Move move, UndoInfo undo)
 
 	if (moverColor == Color::Black)
 		--m_fullMoveNumber;
-
-	if (move.promotionPiece != Piece::None)
-		removePiece(moverColor, move.promotionPiece, move.to);
-	else
-		removePiece(moverColor, move.piece, move.to);
-
-	placePiece(moverColor, move.piece, move.from);
 
 	m_enPassantTarget = undo.previousEnPassantTarget;
 	m_halfMoveClock = undo.previousHalfMoveClock;

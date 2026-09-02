@@ -93,7 +93,7 @@ enum class Square : std::uint8_t {
 
 struct PieceOnSquare {
 	Color color;
-	Piece piece;
+	Piece piece = Piece::None;
 };
 
 enum class CastlingRights : std::uint8_t {

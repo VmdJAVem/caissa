@@ -11,6 +11,18 @@
 
 void Board::setPieces(Color c, Piece p, Bitboard value)
 {
+	Bitboard oldValue = m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)];
+	Bitboard changed = oldValue ^ value;
+	while (changed) {
+		int index = std::countr_zero(changed);
+		bool nowSet = (value >> index) & 1ULL;
+		if (nowSet) {
+			m_mailbox[index] = PieceOnSquare{c, p};
+		} else {
+			m_mailbox[index] = PieceOnSquare{c, Piece::None};
+		}
+		changed &= changed - 1;
+	}
 	m_bitboards[static_cast<size_t>(c)][static_cast<size_t>(p)] = value;
 }
 Bitboard Board::getPieces(Color c, Piece p) const
@@ -72,16 +84,10 @@ std::optional<PieceOnSquare> Board::pieceAt(Square sq) const
 {
 	if (sq == Square::None)
 		return std::nullopt;
-	Bitboard mask = squareToBitboard(sq);
-
-	for (Color c : allColors) {
-		for (Piece p : allPieces) {
-			if (getPieces(c, p) & mask) {
-				return PieceOnSquare{c, p};
-			}
-		}
-	}
-	return std::nullopt; // empty square
+	if (m_mailbox[static_cast<int>(sq)].piece == Piece::None)
+		return std::nullopt;
+	else
+		return m_mailbox[static_cast<int>(sq)];
 }
 
 std::string Board::toString() const
