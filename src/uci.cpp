@@ -1,7 +1,9 @@
 #include "uci.hpp"
 #include "board.hpp"
 #include "search.hpp"
+#include <condition_variable>
 #include <iostream>
+#include <mutex>
 #include <sstream>
 #include <stop_token>
 #include <string>
@@ -77,12 +79,26 @@ std::optional<Move> parseUciMove(const std::string &uci, const Board &board)
 	};
 }
 
+struct GoParams {
+	int wtime = 0;
+	int btime = 0;
+	int winc = 0;
+	int binc = 0;
+	int movestogo = 0;
+	int depth = 0;
+	int movetime = 0;
+	uint64_t nodes = 0;
+
+	bool infinite = false;
+};
+
 void Uci::loop()
 {
 	std::string line;
 	std::cout.setf(std::ios::unitbuf);
 	Board board;
 	std::jthread searchThread;
+	std::jthread timerThread;
 
 	while (std::getline(std::cin, line)) {
 		std::istringstream iss(line);
@@ -146,17 +162,38 @@ void Uci::loop()
 				}
 			}
 		} else if (command == "go") {
-			std::string subcommand;
-			iss >> subcommand;
-			if (subcommand == "depth") {
-				int depth;
-				iss >> depth;
+			std::string token;
+			GoParams params;
+			while (iss >> token) {
+				if (token == "wtime") {
+					iss >> params.wtime;
+				} else if (token == "btime") {
+					iss >> params.btime;
+				} else if (token == "winc") {
+					iss >> params.winc;
+				} else if (token == "binc") {
+					iss >> params.binc;
+				} else if (token == "movestogo") {
+					iss >> params.movestogo;
+				} else if (token == "depth") {
+					iss >> params.depth;
+				} else if (token == "movetime") {
+					iss >> params.movetime;
+				} else if (token == "nodes") {
+					iss >> params.nodes;
+				} else if (token == "infinite") {
+					params.infinite = true;
+				}
+			}
+
+			if (params.depth > 0) {
+				int depth = params.depth;
 
 				searchThread = std::jthread([&board, depth](std::stop_token st) {
 					auto bestMove = iterativeNegaMax(board, depth, st);
 					if (bestMove) {
 						std::cout << "bestmove " << squareName(bestMove->from) << squareName(bestMove->to);
-						
+
 						if (bestMove->promotionPiece != Piece::None) {
 							switch (bestMove->promotionPiece) {
 							case Piece::Queen:
@@ -180,7 +217,48 @@ void Uci::loop()
 						std::cout << "bestmove 0000\n";
 					}
 				});
+			} else if (params.movetime > 0) {
+				searchThread = std::jthread([&board](std::stop_token st) {
+					auto bestMove =
+					    iterativeNegaMax(board, 999999999, st); // just use very large "depth" since whe will stop it from timer thread
+					if (bestMove) {
+						std::cout << "bestmove " << squareName(bestMove->from) << squareName(bestMove->to);
+
+						if (bestMove->promotionPiece != Piece::None) {
+							switch (bestMove->promotionPiece) {
+							case Piece::Queen:
+								std::cout << 'q';
+								break;
+							case Piece::Rook:
+								std::cout << 'r';
+								break;
+							case Piece::Bishop:
+								std::cout << 'b';
+								break;
+							case Piece::Knight:
+								std::cout << 'n';
+								break;
+							default:
+								break;
+							}
+						}
+						std::cout << "\n";
+					} else {
+						std::cout << "bestmove 0000\n";
+					}
+				});
+				timerThread = std::jthread([params, &searchThread](std::stop_token st) {
+					std::mutex m;
+					std::unique_lock<std::mutex> lock(m);
+					std::condition_variable_any cv;
+
+					cv.wait_for(lock, st, std::chrono::milliseconds(params.movetime), [] { return false; });
+
+					if (searchThread.joinable())
+						searchThread.request_stop();
+				});
 			}
+
 		} else if (command == "stop") {
 			if (searchThread.joinable()) {
 				searchThread.request_stop();
