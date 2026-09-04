@@ -5,4 +5,4 @@ learning c++.
 
 * Todo
 - [X] Refactor =pieceAt= hotpath.
-- [ ] more complete UCI support (play by time, ponder, etc.).
+- [-] more complete UCI support (ponder, etc.).
