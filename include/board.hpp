@@ -25,8 +25,8 @@ class Board {
 	void unmakeMove(Move move, UndoInfo undo);
 
     private:
-	std::array<std::array<Bitboard, 6>, 2> m_bitboards;
-	std::array<PieceOnSquare, 64> m_mailbox;
+	std::array<std::array<Bitboard, 6>, 2> m_bitboards{};
+	std::array<PieceOnSquare, 64> m_mailbox{};
 	Color m_sideToMove = Color::White;
 	CastlingRights m_castlingRights = CastlingRights::All;
 	Square m_enPassantTarget = Square::None;

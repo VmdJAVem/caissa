@@ -167,6 +167,7 @@ void Uci::loop()
 			} else {
 				continue;
 			}
+//			std::cout << "info string board after position:\n" << board.toString();
 
 			std::string token;
 

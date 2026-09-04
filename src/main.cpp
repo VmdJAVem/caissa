@@ -1,15 +1,12 @@
 #include "board.hpp"
 #include "movegen.hpp"
+#include "search.hpp"
 #include "uci.hpp"
 #include <iostream>
+#include <stop_token>
 
 int main()
 {
 	Uci::loop();
-	// Board board;
-	// for (int i = 0; i <= 5; i++) {
-	// 	std::cout << "=== DEPTH " << i << " ===" << "\n";
-	// 	std::cout << perft(board, i) << "\n";
-	// }
 	return 0;
 }
