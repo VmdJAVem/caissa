@@ -91,6 +91,31 @@ struct GoParams {
 
 	bool infinite = false;
 };
+void printBestMove(const std::optional<Move> &bestMove)
+{
+	if (!bestMove) {
+		std::cout << "bestmove 0000\n";
+		return;
+	}
+	std::cout << "bestmove " << squareName(bestMove->from) << squareName(bestMove->to);
+	switch (bestMove->promotionPiece) {
+	case Piece::Queen:
+		std::cout << 'q';
+		break;
+	case Piece::Rook:
+		std::cout << 'r';
+		break;
+	case Piece::Bishop:
+		std::cout << 'b';
+		break;
+	case Piece::Knight:
+		std::cout << 'n';
+		break;
+	default:
+		break;
+	}
+	std::cout << "\n";
+}
 
 void Uci::loop()
 {
@@ -191,61 +216,13 @@ void Uci::loop()
 
 				searchThread = std::jthread([&board, depth](std::stop_token st) {
 					auto bestMove = iterativeNegaMax(board, depth, st);
-					if (bestMove) {
-						std::cout << "bestmove " << squareName(bestMove->from) << squareName(bestMove->to);
-
-						if (bestMove->promotionPiece != Piece::None) {
-							switch (bestMove->promotionPiece) {
-							case Piece::Queen:
-								std::cout << 'q';
-								break;
-							case Piece::Rook:
-								std::cout << 'r';
-								break;
-							case Piece::Bishop:
-								std::cout << 'b';
-								break;
-							case Piece::Knight:
-								std::cout << 'n';
-								break;
-							default:
-								break;
-							}
-						}
-						std::cout << "\n";
-					} else {
-						std::cout << "bestmove 0000\n";
-					}
+					printBestMove(bestMove);
 				});
 			} else if (params.movetime > 0) {
 				searchThread = std::jthread([&board](std::stop_token st) {
 					auto bestMove =
 					    iterativeNegaMax(board, 999999999, st); // just use very large "depth" since whe will stop it from timer thread
-					if (bestMove) {
-						std::cout << "bestmove " << squareName(bestMove->from) << squareName(bestMove->to);
-
-						if (bestMove->promotionPiece != Piece::None) {
-							switch (bestMove->promotionPiece) {
-							case Piece::Queen:
-								std::cout << 'q';
-								break;
-							case Piece::Rook:
-								std::cout << 'r';
-								break;
-							case Piece::Bishop:
-								std::cout << 'b';
-								break;
-							case Piece::Knight:
-								std::cout << 'n';
-								break;
-							default:
-								break;
-							}
-						}
-						std::cout << "\n";
-					} else {
-						std::cout << "bestmove 0000\n";
-					}
+					printBestMove(bestMove);
 				});
 				timerThread = std::jthread([params, &searchThread](std::stop_token st) {
 					std::mutex m;
@@ -257,6 +234,34 @@ void Uci::loop()
 					if (searchThread.joinable())
 						searchThread.request_stop();
 				});
+			} else if (params.wtime > 0 && params.btime > 0) {
+				auto color = board.getSideToMove();
+				int totalTimeMs = color == Color::White ? params.wtime : params.btime;
+				int incrementMs = color == Color::White ? params.winc : params.binc;
+				int movesToGo = params.movestogo > 0 ? params.movestogo : 30;
+
+				int budgetMs = std::max(((totalTimeMs / movesToGo) + incrementMs) - 50, 10);
+
+				searchThread = std::jthread([&board](std::stop_token st) {
+					auto bestMove =
+					    iterativeNegaMax(board, 999999999, st); // just use very large "depth" since whe will stop it from timer thread
+					printBestMove(bestMove);
+				});
+				timerThread = std::jthread([&searchThread, budgetMs](std::stop_token st) {
+					std::mutex m;
+					std::unique_lock<std::mutex> lock(m);
+					std::condition_variable_any cv;
+
+					cv.wait_for(lock, st, std::chrono::milliseconds(budgetMs), [] { return false; });
+
+					if (searchThread.joinable())
+						searchThread.request_stop();
+				});
+			} else {
+				searchThread = std::jthread([&board](std::stop_token st) {
+					auto bestMove = iterativeNegaMax(board, 999999999, st);
+					printBestMove(bestMove);
+				});
 			}
 
 		} else if (command == "stop") {
@@ -264,6 +269,8 @@ void Uci::loop()
 				searchThread.request_stop();
 				searchThread.join();
 			}
+		} else if (command == "ucinewgame") {
+			// nothing to reset yet — no persistent state (transposition table, etc.) exists
 		}
 	}
 }
