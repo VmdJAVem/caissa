@@ -6,3 +6,13 @@ learning c++.
 * Todo
 - [X] Refactor =pieceAt= hotpath.
 - [-] more complete UCI support (ponder, etc.).
+
+* Test script
+Output as of now (~C^ced~ by time's sake)
+#+begin_src bash
+ ~/p/caissa/test-script λ ../test-script/time "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQk q - 0 1"
+depth 4: 0.092s  (bestmove b1c3)
+depth 5: 1.057s  (bestmove e2e4)
+depth 6: 8.273s  (bestmove e2e3)
+depth 7: 77.281s  (bestmove e2e3)
+#+end_src
