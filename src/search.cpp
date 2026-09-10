@@ -2,6 +2,7 @@
 #include "evaluation.hpp"
 #include "movegen.hpp"
 #include "moves.hpp"
+#include <iostream>
 #include <stop_token>
 
 constexpr int checkmateScore = -32000;
@@ -42,7 +43,12 @@ int recursiveNegamax(Board &board, int depth, int alpha, int beta, std::stop_tok
 	return alpha;
 }
 
-std::optional<Move> negamax(Board &board, int depth,
+struct MoveAndScore {
+	Move move;
+	int score;
+};
+
+std::optional<MoveAndScore> negamax(Board &board, int depth,
 			    std::stop_token shouldStop)
 {
 	auto moves = generateAllLegalMoves(board);
@@ -68,7 +74,7 @@ std::optional<Move> negamax(Board &board, int depth,
 		}
 	}
 
-	return bestMove;
+	return MoveAndScore{bestMove, bestScore};
 }
 std::optional<Move> iterativeNegaMax(Board &board, int maxDepth,
 				     std::stop_token shouldStop)
@@ -81,7 +87,8 @@ std::optional<Move> iterativeNegaMax(Board &board, int maxDepth,
 		
 		auto result = negamax(board, i, shouldStop);
 		if (result.has_value()) {
-			bestMoveSoFar = result;
+			bestMoveSoFar = result->move;
+			std::cout << "info " << "depth " << i << " score " << "cp " << result->score << "\n";
 		} else {
 			break;
 		}
