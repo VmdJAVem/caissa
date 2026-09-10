@@ -91,6 +91,7 @@ struct GoParams {
 
 	bool infinite = false;
 };
+
 void printBestMove(const std::optional<Move> &bestMove)
 {
 	if (!bestMove) {

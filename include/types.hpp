@@ -137,4 +137,3 @@ struct UndoInfo {
 	Square previousEnPassantTarget;
 	int previousHalfMoveClock;
 };
-enum class GameResult { InProgress, Checkmate, Stalemate };
