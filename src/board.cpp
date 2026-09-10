@@ -80,12 +80,10 @@ Board::Board()
 	setPieces(Color::Black, Piece::King, squareToBitboard(Square::E8));
 }
 
-std::optional<PieceOnSquare> Board::pieceAt(Square sq) const
+PieceOnSquare Board::pieceAt(Square sq) const
 {
-	if (sq == Square::None)
-		return std::nullopt;
-	if (m_mailbox[static_cast<int>(sq)].piece == Piece::None)
-		return std::nullopt;
+	if (sq == Square::None || m_mailbox[static_cast<int>(sq)].piece == Piece::None)
+		return PieceOnSquare{.color = Color::White, .piece = Piece::None};
 	else
 		return m_mailbox[static_cast<int>(sq)];
 }
@@ -99,7 +97,7 @@ std::string Board::toString() const
 			auto p = pieceAt(static_cast<Square>(square));
 			char cp = '.';
 			if (p) {
-				switch (p.value().piece) {
+				switch (p.piece) {
 				case Piece::Pawn:
 					cp = 'p';
 					break;
@@ -121,7 +119,7 @@ std::string Board::toString() const
 				default:
 					break;
 				}
-				if (p.value().color == Color::White) {
+				if (p.color == Color::White) {
 					cp = static_cast<char>(toupper(cp));
 				}
 			}
@@ -325,7 +323,7 @@ std::string Board::toFen() const
 					emptyCount = 0;
 				}
 				char p;
-				switch (sqab->piece) {
+				switch (sqab.piece) {
 				case Piece::Pawn:
 					p = 'p';
 					break;
@@ -348,7 +346,7 @@ std::string Board::toFen() const
 					break;
 				}
 
-				if (sqab->color == Color::White)
+				if (sqab.color == Color::White)
 					p = static_cast<char>(toupper(p));
 				result += p;
 			} else {

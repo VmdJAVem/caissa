@@ -94,6 +94,11 @@ enum class Square : std::uint8_t {
 struct PieceOnSquare {
 	Color color;
 	Piece piece = Piece::None;
+
+	operator bool() const
+	{
+		return piece != Piece::None;
+	}
 };
 
 enum class CastlingRights : std::uint8_t {

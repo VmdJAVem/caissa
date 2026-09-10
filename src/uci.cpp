@@ -51,15 +51,15 @@ std::optional<Move> parseUciMove(const std::string &uci, const Board &board)
 	auto capturedPiece = Piece::None;
 	auto temp = board.pieceAt(toSquare);
 
-	if (temp && temp->color != board.getSideToMove())
-		capturedPiece = temp->piece;
+	if (temp && temp.color != board.getSideToMove())
+		capturedPiece = temp.piece;
 
-	bool isCastling = piece->piece == Piece::King && ((fromSquare == Square::E1 && (toSquare == Square::G1 || toSquare == Square::C1)) ||
+	bool isCastling = piece.piece == Piece::King && ((fromSquare == Square::E1 && (toSquare == Square::G1 || toSquare == Square::C1)) ||
 							  (fromSquare == Square::E8 && (toSquare == Square::G8 || toSquare == Square::C8)));
 
 	bool isEnPassant = false;
 
-	if (piece->piece == Piece::Pawn && !temp && board.getEnPassantTarget() == toSquare) {
+	if (piece.piece == Piece::Pawn && !temp && board.getEnPassantTarget() == toSquare) {
 		int fileDelta = toFile - fromFile;
 		int rankDelta = toRank - fromRank;
 		if (std::abs(fileDelta) == 1 && std::abs(rankDelta) == 1) {
@@ -71,7 +71,7 @@ std::optional<Move> parseUciMove(const std::string &uci, const Board &board)
 	return Move{
 	    .from = fromSquare,
 	    .to = toSquare,
-	    .piece = piece->piece,
+	    .piece = piece.piece,
 	    .capturedPiece = capturedPiece,
 	    .promotionPiece = promotionPiece,
 	    .isEnPassant = isEnPassant,

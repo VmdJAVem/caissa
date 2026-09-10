@@ -15,7 +15,7 @@ class Board {
 	void placePiece(Color c, Piece p, Square sq);
 	void removePiece(Color c, Piece p, Square sq);
 	CastlingRights getCastlingRights() const;
-	std::optional<PieceOnSquare> pieceAt(Square sq) const;
+	PieceOnSquare pieceAt(Square sq) const;
 	static Board empty();
 	static std::expected<Board, std::string>
 	fromFen(const std::string &fen);

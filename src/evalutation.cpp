@@ -51,12 +51,12 @@ bool compareCaptures(const Move &a, const Move &b, const Board &board)
 	assert(a.capturedPiece != Piece::None && b.capturedPiece != Piece::None);
 	// all moves here should be legal so we shit ourselves if they aren't.
 	
-	auto attackerA = board.pieceAt(a.from)->piece;
+	auto attackerA = board.pieceAt(a.from).piece;
 	int aScore = pieceValues[static_cast<int>(a.capturedPiece)] - pieceValues[static_cast<int>(attackerA)];
 	if (a.promotionPiece != Piece::None)
 		aScore += pieceValues[static_cast<int>(a.promotionPiece)];
 
-	auto attackerB = board.pieceAt(b.from)->piece;
+	auto attackerB = board.pieceAt(b.from).piece;
 	int bScore = pieceValues[static_cast<int>(b.capturedPiece)] - pieceValues[static_cast<int>(attackerB)];
 
 	if (b.promotionPiece != Piece::None)
